@@ -1,17 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #ffffff;
-
-  --primary: #ffffff;
-  --secondary: #999999;
-
-  --accent: #7c3aed;
-
-  --max-width: 1440px;
-
-  --radius: 1rem;
+  --background: #040605;
+  --foreground: #d8ffc2;
+  --muted: #87b07a;
+  --border: rgba(145, 255, 98, 0.24);
+  --card: rgba(145, 255, 98, 0.06);
+  --accent: #91ff62;
+  --max-width: 1320px;
 }
 
 html {
@@ -22,12 +18,63 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter);
+  letter-spacing: 0.01em;
   overflow-x: hidden;
 }
 
-.container-custom {
+::selection {
+  background: rgba(145, 255, 98, 0.28);
+  color: #071007;
+}
+
+* {
+  border-color: var(--border);
+}
+
+.container-custom,
+.container-nexus {
   width: 100%;
   max-width: var(--max-width);
   margin-inline: auto;
-  padding-inline: 1.5rem;
+  padding-inline: 24px;
+}
+
+.heading-xl {
+  font-family: var(--font-playfair);
+  font-size: clamp(4rem, 8vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+.heading-lg {
+  font-family: var(--font-playfair);
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.body-muted {
+  color: var(--muted);
+
+  line-height: 1.7;
+}
+
+.section-spacing {
+  padding-block: 120px;
+}
+
+.glass-card {
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+.tone-panel {
+  background: linear-gradient(
+      180deg,
+      rgba(145, 255, 98, 0.05) 0%,
+      rgba(145, 255, 98, 0.025) 100%
+    ),
+    rgba(6, 10, 7, 0.74);
+  border: 1px solid var(--border);
 }
