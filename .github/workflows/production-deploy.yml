@@ -49,7 +49,7 @@ jobs:
           NEXT_PUBLIC_ENVIRONMENT: production
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: .next/
@@ -86,7 +86,7 @@ jobs:
         run: ./mvnw clean package -DskipTests
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: backend/target/*.jar
