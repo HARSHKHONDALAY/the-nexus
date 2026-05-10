@@ -25,6 +25,7 @@ const initialForm = {
   visibility: "PUBLIC",
   seoTitle: "",
   seoDescription: "",
+  posterImage: null as File | null,
 };
 
 export default function AdminEventsClient() {
@@ -119,31 +120,57 @@ export default function AdminEventsClient() {
     }
   }
 
+  async function deleteEvent(eventId: string) {
+    setMessage("");
+    try {
+      await adminApi(`/events/${eventId}`, { method: "DELETE" });
+      await load("current");
+      if (loadedTabs.past) {
+        await loadPast();
+      }
+    } catch (reason) {
+      setMessage(formatAdminError(reason, "Delete failed."));
+    }
+  }
+
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
     try {
+      const formData = new FormData();
+      
+      // Add all form fields as JSON
+      const eventData = {
+        title: form.title,
+        eventType: form.eventType,
+        startsAt: new Date(form.startsAt).toISOString(),
+        endsAt: new Date(form.endsAt).toISOString(),
+        venueName: form.venueName,
+        venueAddress: form.venueAddress,
+        city: form.city,
+        ticketPricePaise: Math.round(Number(form.ticketPrice) * 100),
+        venueCostPaise: Math.round(Number(form.venueCost) * 100),
+        maxCapacity: Number(form.maxCapacity),
+        description: form.description,
+        registrationOpen: form.registrationOpen,
+        publish: form.publish,
+        allowWalkIns: form.allowWalkIns,
+        visibility: form.visibility,
+        seoTitle: form.seoTitle,
+        seoDescription: form.seoDescription,
+      };
+      
+      formData.append('eventData', JSON.stringify(eventData));
+      
+      // Add poster image if selected
+      if (form.posterImage) {
+        formData.append('posterImage', form.posterImage);
+      }
+      
       await adminApi<AdminEvent>("/events", {
         method: "POST",
-        body: JSON.stringify({
-          title: form.title,
-          eventType: form.eventType,
-          startsAt: new Date(form.startsAt).toISOString(),
-          endsAt: new Date(form.endsAt).toISOString(),
-          venueName: form.venueName,
-          venueAddress: form.venueAddress,
-          city: form.city,
-          ticketPricePaise: Math.round(Number(form.ticketPrice) * 100),
-          venueCostPaise: Math.round(Number(form.venueCost) * 100),
-          maxCapacity: Number(form.maxCapacity),
-          description: form.description,
-          registrationOpen: form.registrationOpen,
-          publish: form.publish,
-          allowWalkIns: form.allowWalkIns,
-          visibility: form.visibility,
-          seoTitle: form.seoTitle,
-          seoDescription: form.seoDescription,
-        }),
+        body: formData,
+        headers: {}, // Let browser set Content-Type for FormData
       });
       setForm(initialForm);
       setTab("current");
@@ -194,6 +221,27 @@ export default function AdminEventsClient() {
               <span className="text-xs uppercase tracking-[0.22em] text-lime-100/50">Description</span>
               <textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="rounded-2xl border border-lime-200/14 bg-black/30 px-4 py-3 text-lime-50 outline-none" />
             </label>
+            <label className="grid gap-2 lg:col-span-2">
+              <span className="text-xs uppercase tracking-[0.22em] text-lime-100/50">Event Poster (Optional)</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => setForm({ ...form, posterImage: event.target.files?.[0] || null })}
+                className="rounded-2xl border border-lime-200/14 bg-black/30 px-4 py-3 text-lime-50 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-lime-200/20 file:text-lime-50 hover:file:bg-lime-200/30"
+              />
+              {form.posterImage && (
+                <div className="mt-2 flex items-center gap-4">
+                  <span className="text-sm text-lime-100/70">Selected: {form.posterImage.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, posterImage: null })}
+                    className="text-xs text-red-400 hover:text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </label>
             <Field label="SEO Title" value={form.seoTitle} onChange={(seoTitle) => setForm({ ...form, seoTitle })} />
             <Field label="SEO Description" value={form.seoDescription} onChange={(seoDescription) => setForm({ ...form, seoDescription })} />
             <Toggle label="Open registrations" checked={form.registrationOpen} onChange={(registrationOpen) => setForm({ ...form, registrationOpen })} />
@@ -231,6 +279,13 @@ export default function AdminEventsClient() {
                     <AdminButton variant="ghost" onClick={() => mutateEvent(event.id, "mark_live")}>Mark Live</AdminButton>
                     <AdminButton variant="ghost" onClick={() => mutateEvent(event.id, "move_to_past")}>Move Past</AdminButton>
                     <AdminButton variant="ghost" onClick={() => duplicate(event.id)}>Duplicate</AdminButton>
+                    <AdminButton 
+                      variant="ghost" 
+                      className="col-span-2 border-red-500/30 text-red-400 hover:bg-red-500/10" 
+                      onClick={() => deleteEvent(event.id)}
+                    >
+                      Delete Event
+                    </AdminButton>
                   </div>
                 </div>
               </div>

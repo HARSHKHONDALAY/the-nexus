@@ -55,20 +55,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let alive = true;
+    
+    // Prevent race condition by checking current status before making requests
+    if (status !== "loading") {
+      return;
+    }
+    
     authRequest<AuthUser>("/api/auth/me")
       .then((nextUser) => {
         if (!alive) return;
         setUser(nextUser);
         setStatus("authenticated");
       })
-      .catch(() => refresh())
+      .catch((error) => {
+        if (!alive) return;
+        console.warn("Initial auth check failed, staying anonymous:", error);
+        setUser(null);
+        setStatus("anonymous");
+      })
       .finally(() => {
         if (alive) setStatus((current) => (current === "loading" ? "anonymous" : current));
       });
     return () => {
       alive = false;
     };
-  }, [refresh]);
+  }, []);
+
+  useEffect(() => {
+    if (status === "authenticated" && user) {
+      const interval = setInterval(async () => {
+        try {
+          const refreshedUser = await refresh();
+          if (refreshedUser) {
+            setUser(refreshedUser);
+          }
+        } catch (error) {
+          console.warn("Token refresh failed:", error);
+          // Don't automatically logout on refresh failure to prevent loops
+        }
+      }, 5 * 60 * 1000); // Refresh every 5 minutes
+      
+      return () => clearInterval(interval);
+    }
+  }, [status, user, refresh]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

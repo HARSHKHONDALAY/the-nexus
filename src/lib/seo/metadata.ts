@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { getPrimaryHeroImage } from "@/lib/event-media";
-import type { EventData } from "@/lib/events";
 import { siteConfig } from "./config";
 
 type SeoMetadataOptions = {
@@ -127,42 +125,4 @@ export function createMetadata({
 export const noIndexMetadata = (title: string, description = "This page is not intended for search indexing.") =>
   createMetadata({ title, description, noIndex: true });
 
-export function eventSeoDescription(event: EventData) {
-  return truncate(
-    `${event.tagline} ${event.date} at ${event.venue}, ${event.city}. Tickets from ${event.priceFrom}.`,
-    155,
-  );
-}
-
-export function eventSeoKeywords(event: EventData) {
-  return dedupe([
-    event.title,
-    event.world,
-    `${event.title} tickets`,
-    `${event.world} ${event.city}`,
-    `${event.type.toLowerCase()} in ${event.city}`,
-    `${event.type.toLowerCase()} near me`,
-    `${event.city} ${event.world.toLowerCase()}`,
-    event.venue,
-    event.mood,
-    event.dressCode,
-    ...event.vibePoints,
-  ]);
-}
-
-export function createEventMetadata(event: EventData): Metadata {
-  const heroImage = getPrimaryHeroImage(event);
-  const description = eventSeoDescription(event);
-
-  return createMetadata({
-    title: `${event.title} | ${event.world} Event in ${event.city}`,
-    description,
-    path: `/events/${event.slug}`,
-    image: ogImageUrl(event.title, `${event.world} - ${event.city}`, "event", `${event.date} at ${event.venue}`),
-    imageAlt: heroImage.alt,
-    type: "article",
-    publishedTime: event.dateISO,
-    modifiedTime: event.dateISO,
-    keywords: eventSeoKeywords(event),
-  });
-}
+// Event SEO functions removed - now using backend API directly

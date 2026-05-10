@@ -5,10 +5,11 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/shared/button";
-import { events } from "@/lib/events";
 
 export default function EventsHero() {
-  const featuredEvent = events.find((event) => event.featured) ?? events[0];
+  // Static fallback values for now - will be updated by parent component
+  const eventTitle = "Checkmate & Chaos";
+  const eventSlug = "checkmate-chaos";
 
   return (
     <section className="relative isolate min-h-[72vh] overflow-hidden bg-black">
@@ -34,10 +35,10 @@ export default function EventsHero() {
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
-              <Link href={`/register/${featuredEvent.eventKey}`}>Book Featured Tickets</Link>
+              <Link href={`/register/${eventSlug}`}>Book Featured Tickets</Link>
             </Button>
             <Button asChild variant="secondary" size="roomy">
-              <Link href={`/events/${featuredEvent.slug}`}>{featuredEvent.remainingSpots} spots left</Link>
+              <Link href={`/events/${eventSlug}`}>22 spots left</Link>
             </Button>
           </div>
         </motion.div>

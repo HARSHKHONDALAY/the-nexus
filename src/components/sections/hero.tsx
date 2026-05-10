@@ -71,7 +71,7 @@ export default function Hero() {
     pointerY.set((event.clientY - rect.top) / rect.height - 0.5);
   };
 
-  const heroImage = chessAssets.heroImages[0];
+  const heroImage = chessAssets?.heroImages?.[0];
 
   return (
     <section
@@ -81,8 +81,8 @@ export default function Hero() {
     >
       <div className="hero-cinematic-layer absolute inset-0">
         <Image
-          src={heroImage.src}
-          alt={heroImage.alt}
+          src={heroImage?.src ?? "/events/default-hero.jpg"}
+          alt={heroImage?.alt ?? "The Nexus"}
           fill
           priority
           quality={75}

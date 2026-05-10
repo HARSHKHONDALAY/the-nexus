@@ -24,6 +24,7 @@ import com.thenexus.backend.operations.dto.FinanceSummaryResponse;
 import com.thenexus.backend.security.AdminAuthorizationService;
 import com.thenexus.backend.user.domain.AdminType;
 import com.thenexus.backend.user.domain.User;
+import com.thenexus.backend.webhook.service.CacheInvalidationService;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +64,8 @@ class AdminOperationsServiceTest {
         mock(PlatformAuditLogRepository.class),
         mock(BookingReferenceService.class),
         mock(BookingService.class),
-        new AdminAuthorizationService());
+        new AdminAuthorizationService(),
+        mock(CacheInvalidationService.class));
 
     FinanceSummaryResponse summary = service.financeSummary(chessAdmin);
 
@@ -93,7 +95,8 @@ class AdminOperationsServiceTest {
         auditLogRepository,
         mock(BookingReferenceService.class),
         mock(BookingService.class),
-        new AdminAuthorizationService());
+        new AdminAuthorizationService(),
+        mock(CacheInvalidationService.class));
 
     AdminDashboardResponse dashboard = service.dashboard(user(AdminType.SUPER_ADMIN, null));
 
@@ -128,7 +131,8 @@ class AdminOperationsServiceTest {
         mock(PlatformAuditLogRepository.class),
         mock(BookingReferenceService.class),
         mock(BookingService.class),
-        new AdminAuthorizationService());
+        new AdminAuthorizationService(),
+        mock(CacheInvalidationService.class));
 
     assertThat(service.currentEvents(user(AdminType.SUPER_ADMIN, null))).isEmpty();
   }
@@ -148,7 +152,8 @@ class AdminOperationsServiceTest {
         mock(PlatformAuditLogRepository.class),
         mock(BookingReferenceService.class),
         mock(BookingService.class),
-        new AdminAuthorizationService());
+        new AdminAuthorizationService(),
+        mock(CacheInvalidationService.class));
 
     assertThat(service.pastEvents(user(AdminType.SUPER_ADMIN, null))).isEmpty();
   }
@@ -169,7 +174,8 @@ class AdminOperationsServiceTest {
         mock(PlatformAuditLogRepository.class),
         mock(BookingReferenceService.class),
         mock(BookingService.class),
-        new AdminAuthorizationService());
+        new AdminAuthorizationService(),
+        mock(CacheInvalidationService.class));
 
     AdminDashboardResponse dashboard = service.dashboard(user(AdminType.SUPER_ADMIN, null));
 
@@ -187,8 +193,9 @@ class AdminOperationsServiceTest {
 
   private PlatformEvent event(String ecosystemSlug) {
     EventCategory category = category();
-    ReflectionTestUtils.setField(category, "slug", ecosystemSlug);
-    return new PlatformEvent(
+    // Set the category slug using reflection with proper cast
+    ReflectionTestUtils.setField(category, "slug", (Object) ecosystemSlug);
+    PlatformEvent event = new PlatformEvent(
         category,
         ecosystemSlug + "-event",
         "Event",
@@ -203,6 +210,9 @@ class AdminOperationsServiceTest {
         10,
         true,
         null);
+    // Set the category field properly
+    ReflectionTestUtils.setField(event, "category", category);
+    return event;
   }
 
   private EventCategory category() {

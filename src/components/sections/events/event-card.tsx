@@ -14,7 +14,16 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event }: EventCardProps) {
-  const thumbnail = getEventCardImage(event);
+  // Safe thumbnail access with fallback
+  const thumbnail = (() => {
+    try {
+      const img = getEventCardImage(event);
+      return img || { src: "/events/default-thumbnail.jpg", alt: event.title || "Event" };
+    } catch (error) {
+      console.error('Failed to get event card image:', error);
+      return { src: "/events/default-thumbnail.jpg", alt: event.title || "Event" };
+    }
+  })();
 
   return (
     <motion.article
@@ -24,12 +33,11 @@ export default function EventCard({ event }: EventCardProps) {
     >
       <div className="relative h-52 overflow-hidden rounded-t-[1.7rem] bg-black">
         <Image
-          src={thumbnail.src}
-          alt={thumbnail.alt}
+          src={thumbnail?.src ?? "/events/default-thumbnail.jpg"}
+          alt={thumbnail?.alt ?? event.title ?? "Event"}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover object-center transition duration-1000 ease-out group-hover:scale-[1.03] group-hover:opacity-95"
-          placeholder="blur"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/80" />

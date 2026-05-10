@@ -11,13 +11,22 @@ interface EventHeroProps {
 }
 
 export default function EventHero({ event }: EventHeroProps) {
-  const heroImage = getPrimaryHeroImage(event);
+  // Safe hero image access with fallback
+  const heroImage = (() => {
+    try {
+      const image = getPrimaryHeroImage(event);
+      return image || { src: "/events/default-hero.jpg", alt: event.title };
+    } catch (error) {
+      console.error('Failed to get hero image:', error);
+      return { src: "/events/default-hero.jpg", alt: event.title };
+    }
+  })();
 
   return (
     <section className="relative isolate min-h-[92vh] overflow-hidden bg-black">
       <Image
-        src={heroImage.src}
-        alt={heroImage.alt}
+        src={heroImage?.src ?? "/events/default-hero.jpg"}
+        alt={heroImage?.alt ?? event.title}
         fill
         priority
         quality={75}

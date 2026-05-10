@@ -24,8 +24,8 @@ public class Booking {
   @Id @GeneratedValue @UuidGenerator private UUID id;
   @Column(nullable = false, unique = true, length = 40) private String bookingReference;
   @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id") private User user;
-  @ManyToOne(fetch = FetchType.EAGER, optional = false) @JoinColumn(name = "event_id") private PlatformEvent event;
-  @ManyToOne(fetch = FetchType.EAGER, optional = false) @JoinColumn(name = "ticket_tier_id") private TicketTier ticketTier;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "event_id") private PlatformEvent event;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "ticket_tier_id") private TicketTier ticketTier;
   @Column(nullable = false, length = 160) private String attendeeName;
   @Column(nullable = false, length = 320) private String attendeeEmail;
   @Column(length = 40) private String attendeePhone;

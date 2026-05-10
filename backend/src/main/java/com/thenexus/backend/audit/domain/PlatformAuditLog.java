@@ -22,7 +22,7 @@ public class PlatformAuditLog {
   private UUID entityId;
   @Column(nullable = false, length = 120) private String action;
   @Column(length = 120) private String ecosystemSlug;
-  @Column(columnDefinition = "jsonb") private String metadata;
+  @Column(columnDefinition = "TEXT")private String metadata;
   @Column(length = 80) private String ipAddress;
   @Column(length = 500) private String userAgent;
   @Column(nullable = false, updatable = false) private Instant createdAt = Instant.now();

@@ -3,8 +3,7 @@ import { cookies } from "next/headers";
 export const ACCESS_TOKEN_COOKIE = "nexus_access_token";
 export const REFRESH_TOKEN_COOKIE = "nexus_refresh_token";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-const secure = process.env.NODE_ENV === "production" || (siteUrl.startsWith("https://") && !siteUrl.includes("localhost"));
+const secure = process.env.NODE_ENV === "production";
 
 export async function setAuthCookies(auth: {
   accessToken: string;

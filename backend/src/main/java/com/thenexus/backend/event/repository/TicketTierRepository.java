@@ -12,4 +12,5 @@ public interface TicketTierRepository extends JpaRepository<TicketTier, UUID> {
   List<TicketTier> findByEventIdOrderBySortOrderAsc(UUID eventId);
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   Optional<TicketTier> findLockedById(UUID id);
+  void deleteByEventId(UUID eventId);
 }

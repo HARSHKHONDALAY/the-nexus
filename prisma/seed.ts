@@ -3,35 +3,19 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  // Create only ONE chess event for production
   const events = [
     {
-      eventKey: "checkmate-chaos-2026-05-23",
-      title: "Checkmate & Chaos",
-      eventDate: new Date("2026-05-23"),
-      dateLabel: "23/05/2026",
-      timeLabel: "03:00PM TO 06:00PM",
-      venue: "Coast & Bloom, Dadar",
-      locationShort: "Dadar",
-      price: 600,
-      venueCost: 400,
-      maxSeats: 22,
-      upiId: "Khushalnile06-1@okaxis",
-      whatsappLink: "https://chat.whatsapp.com/FFFQ73MMhDk43xTr6muKFM?mode=hqctcli",
-      status: "PUBLISHED" as const,
-      registrationClosed: false,
-      archivedToPast: false,
-    },
-    {
-      eventKey: "checkmate-chill-2026-05-30",
-      title: "Checkmate & Chill",
-      eventDate: new Date("2026-05-30"),
-      dateLabel: "30/05/2026",
-      timeLabel: "12:00pm TO 03:00pm",
-      venue: "Bustling Brew, Thane",
-      locationShort: "Thane",
-      price: 600,
-      venueCost: 315,
-      maxSeats: 22,
+      eventKey: "chess-social-night-2026-06-15",
+      title: "Chess Social Night",
+      eventDate: new Date("2026-06-15"),
+      dateLabel: "15/06/2026",
+      timeLabel: "07:00PM TO 11:00PM",
+      venue: "The Chess Club",
+      locationShort: "Bandra",
+      price: 1500,
+      venueCost: 15000,
+      maxSeats: 50,
       upiId: "Khushalnile06-1@okaxis",
       whatsappLink: "https://chat.whatsapp.com/FFFQ73MMhDk43xTr6muKFM?mode=hqctcli",
       status: "PUBLISHED" as const,
@@ -48,13 +32,13 @@ async function main() {
     });
   }
 
-  const checkmateChaos = await prisma.event.findUniqueOrThrow({ where: { eventKey: "checkmate-chaos-2026-05-23" } });
+  const chessEvent = await prisma.event.findUniqueOrThrow({ where: { eventKey: "chess-social-night-2026-06-15" } });
 
   await prisma.registration.upsert({
-    where: { eventId_contactNumber: { eventId: checkmateChaos.id, contactNumber: "9000000001" } },
+    where: { eventId_contactNumber: { eventId: chessEvent.id, contactNumber: "9000000001" } },
     update: {},
     create: {
-      eventId: checkmateChaos.id,
+      eventId: chessEvent.id,
       fullName: "Aarav Mehta",
       contactNumber: "9000000001",
       email: "aarav@nexus.local",
@@ -72,16 +56,16 @@ async function main() {
       sourceType: "WEBSITE",
       paymentStatus: "VERIFIED",
       registrationStatus: "CONFIRMED",
-      eventTitleSnapshot: checkmateChaos.title,
-      eventDateSnapshot: checkmateChaos.eventDate,
-      eventTimeSnapshot: checkmateChaos.timeLabel,
-      eventVenueSnapshot: checkmateChaos.venue,
+      eventTitleSnapshot: chessEvent.title,
+      eventDateSnapshot: chessEvent.eventDate,
+      eventTimeSnapshot: chessEvent.timeLabel,
+      eventVenueSnapshot: chessEvent.venue,
     },
   });
 
   await prisma.financeAdjustment.create({
     data: {
-      eventId: checkmateChaos.id,
+      eventId: chessEvent.id,
       section: "EXPENSE",
       operator: "ADD",
       amount: 1487,
@@ -91,7 +75,7 @@ async function main() {
 
   await prisma.auditLog.create({
     data: {
-      eventId: checkmateChaos.id,
+      eventId: chessEvent.id,
       actionKey: "seed.admin_bootstrap",
       actionLabel: "Admin seed bootstrap",
       details: "Seeded The Nexus admin operating database foundation.",

@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import type { EventData } from "@/lib/events";
 
 interface FloatingTicketCtaProps {
-  event: EventData;
+  event: EventData | null | undefined;
   label?: string;
 }
 
@@ -15,6 +15,11 @@ export default function FloatingTicketCta({
   event,
   label = "Book Tickets",
 }: FloatingTicketCtaProps) {
+  // Defensive rendering guard - don't render if no event data
+  if (!event || !event.title) {
+    return null;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}

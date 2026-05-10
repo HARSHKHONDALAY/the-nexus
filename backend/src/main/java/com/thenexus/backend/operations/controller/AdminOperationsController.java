@@ -13,11 +13,16 @@ import com.thenexus.backend.operations.dto.FinanceSummaryResponse;
 import com.thenexus.backend.operations.dto.WalkInRequest;
 import com.thenexus.backend.operations.service.AdminOperationsService;
 import com.thenexus.backend.security.NexusPrincipal;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thenexus.backend.common.exception.ApiException;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,15 +37,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/operations/admin")
 public class AdminOperationsController {
   private final AdminOperationsService service;
+  private final ObjectMapper objectMapper;
 
-  public AdminOperationsController(AdminOperationsService service) {
+  public AdminOperationsController(AdminOperationsService service, ObjectMapper objectMapper) {
     this.service = service;
+    this.objectMapper = objectMapper;
   }
 
   @GetMapping("/dashboard")
   @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('events.read') or hasAuthority('registrations.read')")
   ApiResponse<AdminDashboardResponse> dashboard(@AuthenticationPrincipal NexusPrincipal principal) {
     return ApiResponse.ok(service.dashboard(principal.getUser()));
+  }
+
+  @GetMapping("/events")
+  @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('events.read') or hasAuthority('registrations.read')")
+  ApiResponse<List<AdminEventResponse>> allEvents(@AuthenticationPrincipal NexusPrincipal principal) {
+    List<AdminEventResponse> currentEvents = service.currentEvents(principal.getUser());
+    List<AdminEventResponse> pastEvents = service.pastEvents(principal.getUser());
+    List<AdminEventResponse> allEvents = new ArrayList<>();
+    allEvents.addAll(currentEvents);
+    allEvents.addAll(pastEvents);
+    return ApiResponse.ok(allEvents);
   }
 
   @GetMapping("/events/current")
@@ -58,9 +76,24 @@ public class AdminOperationsController {
   @PostMapping("/events")
   @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('events.manage')")
   ApiResponse<AdminEventResponse> createEvent(
-      @Valid @RequestBody CreateAdminEventRequest request,
+      @RequestParam("eventData") String eventDataJson,
+      @RequestParam(value = "posterImage", required = false) MultipartFile posterImage,
       @AuthenticationPrincipal NexusPrincipal principal) {
-    return ApiResponse.ok(service.createEvent(request, principal.getUser()), "Event created.");
+    try {
+      // Parse the JSON event data
+      CreateAdminEventRequest request = objectMapper.readValue(eventDataJson, CreateAdminEventRequest.class);
+      
+      // Handle poster image upload if present
+      if (posterImage != null && !posterImage.isEmpty()) {
+        // TODO: Implement poster image upload logic
+        // For now, just log that we received the image
+        System.out.println("Received poster image: " + posterImage.getOriginalFilename() + " (" + posterImage.getSize() + " bytes)");
+      }
+      
+      return ApiResponse.ok(service.createEvent(request, principal.getUser()), "Event created.");
+    } catch (Exception e) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid event data: " + e.getMessage());
+    }
   }
 
   @PatchMapping("/events/{eventId}/status")
@@ -69,7 +102,14 @@ public class AdminOperationsController {
       @PathVariable UUID eventId,
       @Valid @RequestBody EventStatusRequest request,
       @AuthenticationPrincipal NexusPrincipal principal) {
-    return ApiResponse.ok(service.updateEventStatus(eventId, request.action(), principal.getUser()), "Event updated.");
+    return ApiResponse.ok(service.updateEventStatus(eventId, request, principal.getUser()), "Event status updated.");
+  }
+
+  @DeleteMapping("/events/{eventId}")
+  @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('events.manage')")
+  ApiResponse<Void> deleteEvent(@PathVariable UUID eventId, @AuthenticationPrincipal NexusPrincipal principal) {
+    service.deleteEvent(eventId, principal.getUser());
+    return ApiResponse.ok(null, "Event deleted successfully.");
   }
 
   @PostMapping("/events/{eventId}/duplicate")

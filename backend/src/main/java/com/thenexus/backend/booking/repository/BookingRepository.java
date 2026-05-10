@@ -29,4 +29,14 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
       order by b.createdAt desc
       """)
   List<Booking> searchEventBookings(@Param("eventId") UUID eventId, @Param("query") String query);
+
+  // Optimized queries to prevent N+1 issues
+  @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.event LEFT JOIN FETCH b.ticketTier WHERE b.event.id = :eventId ORDER BY b.createdAt DESC")
+  List<Booking> findByEventIdWithEventAndTicketTier(UUID eventId);
+
+  @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.event LEFT JOIN FETCH b.ticketTier ORDER BY b.createdAt DESC")
+  List<Booking> findAllWithEventAndTicketTier();
+
+  @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.event LEFT JOIN FETCH b.ticketTier WHERE b.id = :bookingId")
+  Optional<Booking> findByIdWithEventAndTicketTier(@Param("bookingId") UUID bookingId);
 }

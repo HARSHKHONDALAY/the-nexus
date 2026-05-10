@@ -21,6 +21,8 @@ import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+  private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
@@ -98,9 +101,13 @@ public class AuthService {
 
   private java.util.Optional<User> findLoginUser(String identifier) {
     if (identifier != null && identifier.contains("@")) {
-      return userRepository.findByNormalizedEmail(User.normalizeEmail(identifier));
+      String normalizedEmail = User.normalizeEmail(identifier);
+      log.debug("Finding user by normalized email: {}", normalizedEmail);
+      return userRepository.findByNormalizedEmail(normalizedEmail);
     }
-    return userRepository.findByNormalizedUsername(User.normalizeUsername(identifier));
+    String normalizedUsername = User.normalizeUsername(identifier);
+    log.debug("Finding user by normalized username: {}", normalizedUsername);
+    return userRepository.findByNormalizedUsername(normalizedUsername);
   }
 
   @Transactional

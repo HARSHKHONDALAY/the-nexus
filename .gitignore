@@ -9,7 +9,25 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+# Logs
+*.log
 
+# Local VSCode
+.vscode/
+
+# Temp/debug
+cp.txt
+
+# Local verification scripts output
+*.tmp
+# Logs
+*.log
+
+# VSCode
+.vscode/
+
+# Temp/debug files
+cp.txt
 # testing
 /coverage
 

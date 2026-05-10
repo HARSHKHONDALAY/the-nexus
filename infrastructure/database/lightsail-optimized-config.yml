@@ -1,0 +1,77 @@
+# AWS Lightsail Optimized Database Configuration
+# Optimized for typical Lightsail instance specifications (2GB RAM, 2 vCPU)
+
+spring:
+  datasource:
+    # Connection pool settings optimized for Lightsail
+    hikari:
+      # Core pool settings
+      maximum-pool-size: ${DB_POOL_SIZE:10}  # Reduced from 15 for 2GB RAM
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}    # Reduced from 3
+      idle-timeout: ${DB_POOL_IDLE_TIMEOUT:300000}     # 5 minutes (reduced from 10)
+      max-lifetime: ${DB_POOL_MAX_LIFETIME:600000}     # 10 minutes (reduced from 15)
+      connection-timeout: ${DB_POOL_CONNECTION_TIMEOUT:15000}  # 15 seconds (reduced from 20)
+      
+      # Lightsail-specific optimizations
+      leak-detection-threshold: ${DB_POOL_LEAK_DETECTION:60000}  # 1 minute (reduced from 30 seconds)
+      pool-name: NexusLightsailPool
+      initialization-fail-timeout: 30000  # 30 seconds to initialize
+      
+      # Performance optimizations for limited resources
+      allow-pool-suspension: false
+      read-only: false
+      register-mbeans: true
+      
+      # Connection validation
+      validation-timeout: 3000
+      connection-test-query: SELECT 1
+      
+  jpa:
+    properties:
+      hibernate:
+        # Optimizations for limited memory
+        jdbc:
+          batch_size: 20
+          fetch_size: 100
+          batch_versioned_data: true
+          
+        # Query optimization
+        cache:
+          use_second_level_cache: false  # Disable for memory efficiency
+          use_query_cache: false
+          
+        # Connection optimization
+        hbm2ddl:
+          auto: validate
+          
+        # Statement optimization
+        jdbc:
+          time_zone: UTC
+          batch_size: 20
+          
+        # Memory optimization
+        generate_statistics: false
+        session:
+          events:
+            log:
+              statement: false
+
+# Monitoring configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    enable:
+      hikaricp: true
+      jdbc: true
+      jvm: true
+
+# Logging configuration for production
+logging:
+  level:
+    com.zaxxer.hikari: WARN
+    org.springframework.jdbc: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN

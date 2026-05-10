@@ -130,7 +130,7 @@ export default function Founders() {
                     alt={founder.imageAlt}
                     sizes="(min-width: 1024px) 48vw, 100vw"
                     priority={index === 0}
-                    placeholder="blur"
+                    
                     className={cn(
                       "absolute z-10 drop-shadow-[0_28px_55px_rgba(0,0,0,0.5)] transition duration-700 group-hover:scale-[1.035]",
                       founder.imageClassName,

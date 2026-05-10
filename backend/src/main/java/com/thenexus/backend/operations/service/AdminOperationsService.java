@@ -26,12 +26,14 @@ import com.thenexus.backend.operations.dto.AdminEventResponse;
 import com.thenexus.backend.operations.dto.AttendeeResponse;
 import com.thenexus.backend.operations.dto.AuditLogResponse;
 import com.thenexus.backend.operations.dto.CreateAdminEventRequest;
+import com.thenexus.backend.operations.dto.EventStatusRequest;
 import com.thenexus.backend.operations.dto.FinanceEntryRequest;
 import com.thenexus.backend.operations.dto.FinanceEntryResponse;
 import com.thenexus.backend.operations.dto.FinanceSummaryResponse;
 import com.thenexus.backend.operations.dto.WalkInRequest;
 import com.thenexus.backend.security.AdminAuthorizationService;
 import com.thenexus.backend.user.domain.User;
+import com.thenexus.backend.webhook.service.CacheInvalidationService;
 import jakarta.transaction.Transactional;
 import java.text.Normalizer;
 import java.time.Instant;
@@ -59,6 +61,7 @@ public class AdminOperationsService {
   private final BookingReferenceService referenceService;
   private final BookingService bookingService;
   private final AdminAuthorizationService adminAuthorizationService;
+  private final CacheInvalidationService cacheInvalidationService;
 
   public AdminOperationsService(
       PlatformEventRepository eventRepository,
@@ -70,7 +73,8 @@ public class AdminOperationsService {
       PlatformAuditLogRepository auditLogRepository,
       BookingReferenceService referenceService,
       BookingService bookingService,
-      AdminAuthorizationService adminAuthorizationService) {
+      AdminAuthorizationService adminAuthorizationService,
+      CacheInvalidationService cacheInvalidationService) {
     this.eventRepository = eventRepository;
     this.categoryRepository = categoryRepository;
     this.ticketTierRepository = ticketTierRepository;
@@ -81,6 +85,7 @@ public class AdminOperationsService {
     this.referenceService = referenceService;
     this.bookingService = bookingService;
     this.adminAuthorizationService = adminAuthorizationService;
+    this.cacheInvalidationService = cacheInvalidationService;
   }
 
   @Transactional
@@ -89,6 +94,9 @@ public class AdminOperationsService {
     List<String> unavailableServices = new ArrayList<>();
 
     List<AdminEventResponse> currentEvents;
+    List<AuditLogResponse> recentActivity;
+    
+    // Try to load current events with safe fallback
     try {
       currentEvents = currentEvents(actor);
     } catch (RuntimeException exception) {
@@ -97,8 +105,8 @@ public class AdminOperationsService {
       alerts.add("Current event metrics are temporarily unavailable.");
       unavailableServices.add("currentEvents");
     }
-
-    List<AuditLogResponse> recentActivity;
+    
+    // Try to load recent activity with safe fallback
     try {
       recentActivity = auditLogs(actor).stream().limit(8).toList();
     } catch (RuntimeException exception) {
@@ -177,6 +185,14 @@ public class AdminOperationsService {
     ticketTierRepository.save(new TicketTier(saved, "General Entry", "Standard access", request.ticketPricePaise(), "INR",
         request.maxCapacity(), null, null, 0));
     audit(actor, "event", saved.getId(), "event.created", eventEcosystem(saved), "{\"title\":\"" + escape(saved.getTitle()) + "\"}");
+    
+    // Invalidate frontend caches
+    if (request.publish()) {
+      cacheInvalidationService.invalidateEventPage(saved.getSlug());
+      cacheInvalidationService.invalidateAllEvents();
+      cacheInvalidationService.invalidateHomePage();
+    }
+    
     return eventResponse(saved);
   }
 
@@ -193,6 +209,14 @@ public class AdminOperationsService {
       default -> throw new ApiException(HttpStatus.BAD_REQUEST, "Unknown event action.");
     }
     audit(actor, "event", event.getId(), "event." + action, eventEcosystem(event), "{}");
+    
+    // Invalidate frontend caches for publishing actions
+    if ("publish".equals(action) || "mark_live".equals(action)) {
+      cacheInvalidationService.invalidateEventPage(event.getSlug());
+      cacheInvalidationService.invalidateAllEvents();
+      cacheInvalidationService.invalidateHomePage();
+    }
+    
     return eventResponse(event);
   }
 
@@ -418,6 +442,42 @@ public class AdminOperationsService {
         .filter(entry -> entry.getEntryType() == type)
         .mapToLong(FinanceEntry::getAmountPaise)
         .sum();
+  }
+
+  public AdminEventResponse updateEventStatus(UUID eventId, EventStatusRequest request, User actor) {
+    PlatformEvent event = eventRepository.findById(eventId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Event not found."));
+    
+    adminAuthorizationService.assertCanAccessEvent(actor, event);
+    
+    switch (request.action()) {
+      case "close_registrations" -> event.closeRegistrations(actor);
+      case "open_registrations" -> event.openRegistrations(actor);
+      case "mark_live" -> event.markLive(actor);
+      case "archive" -> event.archive(actor);
+      case "close" -> event.close(actor);
+      default -> throw new ApiException(HttpStatus.BAD_REQUEST, "Unknown action: " + request.action());
+    }
+    
+    audit(actor, "event", eventId, "status_update", String.format("action=%s", request.action()));
+    PlatformEvent savedEvent = eventRepository.save(event);
+    return eventResponse(savedEvent);
+  }
+
+  @Transactional
+  public void deleteEvent(UUID eventId, User actor) {
+    PlatformEvent event = eventRepository.findById(eventId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Event not found."));
+    
+    adminAuthorizationService.assertCanAccessEvent(actor, event);
+    
+    // Delete associated ticket tiers first
+    ticketTierRepository.deleteByEventId(eventId);
+    
+    // Delete the event
+    eventRepository.delete(event);
+    
+    audit(actor, "event", eventId, "delete", String.format("title=%s", event.getTitle()));
   }
 
   private String escape(String value) {

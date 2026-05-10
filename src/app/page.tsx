@@ -9,7 +9,8 @@ import FeaturedExperiences from "@/components/sections/featured-experiences";
 import PhilosophyBelonging from "@/components/sections/philosophy-belonging";
 import FloatingTicketCta from "@/components/conversion/floating-ticket-cta";
 import JsonLd from "@/components/seo/json-ld";
-import { events } from "@/lib/events";
+import { getFeaturedEvents } from "@/lib/api/events";
+import { mapPlatformEventsToEventData } from "@/lib/api/event-mappers";
 import { createMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema, eventItemListSchema, jsonLdGraph, webPageSchema } from "@/lib/seo/schema";
 
@@ -25,8 +26,23 @@ export const metadata = createMetadata({
   keywords: ["Mumbai event platform", "premium social events", "chess socials", "art workshops"],
 });
 
-export default function HomePage() {
-  const featuredEvent = events.find((event) => event.featured) ?? events[0];
+export default async function HomePage() {
+  // Fetch featured events from backend API with safe error handling
+  let featuredEvents: any[] = [];
+  let mappedEvents: any[] = [];
+  let featuredEvent: any = null;
+  
+  try {
+    featuredEvents = await getFeaturedEvents();
+    mappedEvents = mapPlatformEventsToEventData(featuredEvents);
+    featuredEvent = mappedEvents[0] || null;
+  } catch (error) {
+    console.error('Failed to fetch featured events for homepage:', error);
+    // Set safe defaults to prevent homepage crash
+    featuredEvents = [];
+    mappedEvents = [];
+    featuredEvent = null;
+  }
 
   return (
     <>
@@ -49,7 +65,7 @@ export default function HomePage() {
         <CommunityMemory />
         <EditorialShowcase />
       </main>
-      <FloatingTicketCta event={featuredEvent} />
+      {featuredEvent && featuredEvent.slug && <FloatingTicketCta event={featuredEvent} />}
       <FooterEcosystem />
     </>
   );

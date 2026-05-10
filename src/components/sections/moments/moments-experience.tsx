@@ -75,7 +75,7 @@ function MomentsImage({
       priority={priority}
       quality={75}
       sizes={sizes}
-      placeholder="blur"
+      
       className={`object-cover ${className}`}
     />
   );
@@ -296,15 +296,15 @@ export default function MomentsExperience({ featuredEvent }: MomentsExperiencePr
       {chessVideo?.src ? (
         <section className="relative min-h-[76vh] overflow-hidden border-y border-cyan-100/10 bg-black">
           <video
-            className="absolute inset-0 hidden h-full w-full object-cover opacity-62 saturate-[0.8] md:block"
-            src={chessVideo.src}
-            poster={heroImage.src.src}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-          />
+  className="absolute inset-0 hidden h-full w-full object-cover opacity-62 saturate-[0.8] md:block"
+  src={chessVideo.src}
+  poster={typeof heroImage.src === "string" ? heroImage.src : heroImage.src.src}
+  autoPlay
+  muted
+  loop
+  playsInline
+  preload="metadata"
+/>
           <MomentsImage asset={heroImage} sizes="100vw" className="md:hidden opacity-64" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92),rgba(0,0,0,0.38)_55%,rgba(0,0,0,0.82)),linear-gradient(to_top,#020617,transparent_44%,#020617)]" />
           <div className="container-custom relative z-10 flex min-h-[76vh] items-end py-16 md:items-center md:py-24">

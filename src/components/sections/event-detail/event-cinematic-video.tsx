@@ -40,7 +40,7 @@ export default function EventCinematicVideo({ event }: EventCinematicVideoProps)
           fill
           sizes="(max-width: 768px) 100vw, 86vw"
           className="object-cover opacity-70 saturate-[0.82]"
-          placeholder="blur"
+          
         />
         <video
           className="absolute inset-0 hidden h-full w-full object-cover opacity-72 saturate-[0.82] md:block"

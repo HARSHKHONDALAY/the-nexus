@@ -17,11 +17,17 @@ import com.thenexus.backend.user.domain.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EventService {
+  private static final Logger log = LoggerFactory.getLogger(EventService.class);
+  
   private final EventCategoryRepository categoryRepository;
   private final PlatformEventRepository eventRepository;
   private final TicketTierRepository ticketTierRepository;
@@ -35,16 +41,52 @@ public class EventService {
     this.adminAuthorizationService = adminAuthorizationService;
   }
 
+  @Transactional
+  @Cacheable(value = "publicEvents", key = "'all'")
   public List<EventResponse> publicEvents() {
-    return eventRepository.findByStatusInOrderByStartsAtAsc(List.of(EventStatus.PUBLISHED, EventStatus.LIVE, EventStatus.SOLD_OUT))
-        .stream().map(EventResponse::from).toList();
+    log.info("Fetching public events...");
+    try {
+      // Use the safer query that explicitly joins categories to prevent lazy loading issues
+      List<PlatformEvent> events = eventRepository.findByStatusInOrderByStartsAtAscWithCategories(List.of(EventStatus.PUBLISHED, EventStatus.LIVE, EventStatus.SOLD_OUT));
+      log.info("Found {} events with PUBLISHED/LIVE/SOLD_OUT status", events.size());
+      
+      // Stream-based processing for better performance
+      return events.stream()
+          .map(EventResponse::from)
+          .toList();
+      
+    } catch (Exception e) {
+      log.error("Failed to fetch public events", e);
+      throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch public events");
+    }
   }
 
   public EventResponse publicEventBySlug(String slug) {
-    PlatformEvent event = eventRepository.findBySlug(slug)
-        .filter(found -> found.getStatus() == EventStatus.PUBLISHED || found.getStatus() == EventStatus.LIVE || found.getStatus() == EventStatus.SOLD_OUT)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Event not found."));
-    return EventResponse.from(event);
+    try {
+      PlatformEvent event = eventRepository.findBySlug(slug)
+          .filter(found -> found.getStatus() == EventStatus.PUBLISHED || found.getStatus() == EventStatus.LIVE || found.getStatus() == EventStatus.SOLD_OUT)
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Event not found."));
+      
+      // Validate event data before processing
+      if (event.getId() == null) {
+        throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Event has invalid ID");
+      }
+      
+      if (event.getTitle() == null || event.getTitle().trim().isEmpty()) {
+        throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Event has invalid title");
+      }
+      
+      if (event.getSlug() == null || event.getSlug().trim().isEmpty()) {
+        throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Event has invalid slug");
+      }
+      
+      return EventResponse.from(event);
+    } catch (ApiException e) {
+      throw e; // Re-throw API exceptions
+    } catch (Exception e) {
+      log.error("Error fetching event by slug: {}", slug, e);
+      throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch event: " + e.getMessage());
+    }
   }
 
   public List<EventResponse> adminEvents(User actor) {
@@ -68,6 +110,7 @@ public class EventService {
   }
 
   @Transactional
+  @CacheEvict(value = {"publicEvents", "eventBySlug"}, allEntries = true)
   public EventResponse publish(UUID eventId, User actor) {
     PlatformEvent event = getEvent(eventId);
     adminAuthorizationService.assertCanAccessEvent(actor, event);
@@ -76,6 +119,7 @@ public class EventService {
   }
 
   @Transactional
+  @CacheEvict(value = {"publicEvents", "eventBySlug"}, allEntries = true)
   public EventResponse archive(UUID eventId, User actor) {
     PlatformEvent event = getEvent(eventId);
     adminAuthorizationService.assertCanAccessEvent(actor, event);
@@ -94,6 +138,18 @@ public class EventService {
 
   public List<TicketTierResponse> tiers(UUID eventId) {
     return ticketTierRepository.findByEventIdOrderBySortOrderAsc(eventId).stream().map(TicketTierResponse::from).toList();
+  }
+
+  @Transactional
+  public void delete(UUID eventId, User actor) {
+    PlatformEvent event = getEvent(eventId);
+    adminAuthorizationService.assertCanAccessEvent(actor, event);
+    
+    // Delete associated ticket tiers first
+    ticketTierRepository.deleteByEventId(eventId);
+    
+    // Delete the event
+    eventRepository.delete(event);
   }
 
   public PlatformEvent getEvent(UUID eventId) {

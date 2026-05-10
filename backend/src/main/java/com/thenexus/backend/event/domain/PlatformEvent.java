@@ -24,7 +24,7 @@ public class PlatformEvent {
   @UuidGenerator
   private UUID id;
 
-  @ManyToOne(fetch = FetchType.EAGER, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "category_id")
   private EventCategory category;
 
@@ -53,10 +53,10 @@ public class PlatformEvent {
   @Column(nullable = false, length = 120)
   private String city;
 
-  @Column(nullable = false)
+  @Column(name = "starts_at", nullable = false)
   private Instant startsAt;
 
-  @Column(nullable = false)
+  @Column(name = "ends_at", nullable = false)
   private Instant endsAt;
 
   @Column(nullable = false, length = 80)
@@ -102,7 +102,8 @@ public class PlatformEvent {
   @JoinColumn(name = "updated_by")
   private User updatedBy;
 
-  private Instant deletedAt;
+  @Column(name = "deleted_at")
+private Instant deletedAt;
 
   @Column(nullable = false, updatable = false)
   private Instant createdAt = Instant.now();

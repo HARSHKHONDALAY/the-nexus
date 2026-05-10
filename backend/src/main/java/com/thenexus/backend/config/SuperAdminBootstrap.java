@@ -48,7 +48,7 @@ public class SuperAdminBootstrap implements CommandLineRunner {
       return;
     }
     Role superAdminRole = roleRepository.findByCode(RoleCode.SUPER_ADMIN).orElseThrow();
-    User superAdmin = new User(email, passwordEncoder.encode(password), fullName, null);
+    User superAdmin = new User(email, null, passwordEncoder.encode(password), fullName, null);
     superAdmin.addRole(superAdminRole);
     superAdmin.assignAdminScope(AdminType.SUPER_ADMIN, null);
     userRepository.save(superAdmin);

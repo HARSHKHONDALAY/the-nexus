@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,10 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/events")
 public class EventController {
   private final EventService eventService;
-  public EventController(EventService eventService) { this.eventService = eventService; }
+  
+  public EventController(EventService eventService) { 
+    this.eventService = eventService; 
+  }
 
-  @GetMapping
-  ApiResponse<List<EventResponse>> publicEvents() { return ApiResponse.ok(eventService.publicEvents()); }
+  @GetMapping("/public")
+  ApiResponse<List<EventResponse>> publicEvents() { 
+    return ApiResponse.ok(eventService.publicEvents()); 
+  }
 
   @GetMapping("/slug/{slug}")
   ApiResponse<EventResponse> publicEventBySlug(@PathVariable String slug) {
@@ -58,6 +64,13 @@ public class EventController {
   @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('events.manage')")
   ApiResponse<EventResponse> archive(@PathVariable UUID eventId, @AuthenticationPrincipal NexusPrincipal principal) {
     return ApiResponse.ok(eventService.archive(eventId, principal.getUser()), "Event archived.");
+  }
+
+  @DeleteMapping("/{eventId}")
+  @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('events.manage')")
+  ApiResponse<Void> delete(@PathVariable UUID eventId, @AuthenticationPrincipal NexusPrincipal principal) {
+    eventService.delete(eventId, principal.getUser());
+    return ApiResponse.ok(null, "Event deleted successfully.");
   }
 
   @PostMapping("/admin/{eventId}/ticket-tiers")

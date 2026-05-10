@@ -49,7 +49,7 @@ export default function EventGallery({ event }: EventGalleryProps) {
               fill
               sizes={index === 0 ? "(max-width: 768px) 100vw, 58vw" : "(max-width: 768px) 100vw, 42vw"}
               className="object-cover transition duration-[1200ms] ease-out group-hover:scale-[1.045]"
-              placeholder="blur"
+              
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/18 to-black/88" />
             <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">

@@ -4,16 +4,81 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import Magnetic from "@/components/interactions/magnetic";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import SectionHeading from "@/components/shared/section-heading";
 import { Button } from "@/components/shared/button";
-import { getPrimaryThumbnail } from "@/lib/event-media";
-import { events } from "@/lib/events";
+import { getFeaturedEvents } from "@/lib/api/events";
+import { mapPlatformEventsToEventData } from "@/lib/api/event-mappers";
 
 export default function FeaturedExperiences() {
-  const featuredExperiences = events;
+  const [featuredExperiences, setFeaturedExperiences] = useState<EventData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const events = await getFeaturedEvents();
+        const mappedEvents = mapPlatformEventsToEventData(events);
+        setFeaturedExperiences(mappedEvents);
+      } catch (error) {
+        console.error("Failed to load featured experiences:", error);
+        // Set empty array on error to prevent infinite loading
+        setFeaturedExperiences([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <SectionWrapper
+        id="featured-experiences"
+        className="border-y border-lime-200/12 bg-black/40"
+        spacing="default"
+        blendTop
+        blendBottom
+      >
+        <SectionHeading
+          eyebrow="Rooms Inside The Nexus"
+          title="Choose the energy you want to belong to."
+          description="Chess for the socially strategic. Art for the emotionally open. Every format is limited, hosted, and designed to make coming alone feel completely natural."
+        />
+        <div className="mt-12 grid gap-4 md:mt-14 md:grid-cols-3 md:gap-5">
+          {/* Loading skeleton */}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-64 animate-pulse rounded-3xl bg-lime-200/10" />
+          ))}
+        </div>
+      </SectionWrapper>
+    );
+  }
+
+  if (featuredExperiences.length === 0) {
+    return (
+      <SectionWrapper
+        id="featured-experiences"
+        className="border-y border-lime-200/12 bg-black/40"
+        spacing="default"
+        blendTop
+        blendBottom
+      >
+        <SectionHeading
+          eyebrow="Rooms Inside The Nexus"
+          title="Choose the energy you want to belong to."
+          description="Chess for the socially strategic. Art for the emotionally open. Every format is limited, hosted, and designed to make coming alone feel completely natural."
+        />
+        <div className="mt-12 text-center text-lime-100/60">
+          <p>No events available at the moment. Check back soon!</p>
+        </div>
+      </SectionWrapper>
+    );
+  }
 
   return (
     <SectionWrapper
@@ -31,7 +96,11 @@ export default function FeaturedExperiences() {
 
       <div className="mt-12 grid gap-4 md:mt-14 md:grid-cols-3 md:gap-5">
         {featuredExperiences.map((item, index) => {
-          const thumbnail = getPrimaryThumbnail(item);
+          // Simple fallback thumbnail since getPrimaryThumbnail was removed
+          const thumbnail = { 
+            src: "/events/default-thumbnail.jpg", 
+            alt: item.title || "Event" 
+          };
 
           return (
             <motion.article
@@ -49,7 +118,6 @@ export default function FeaturedExperiences() {
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover object-center opacity-90 transition duration-1000 group-hover:scale-[1.03]"
-                  placeholder="blur"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/15 to-black/85" />
                 <div className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 bg-[linear-gradient(120deg,transparent_25%,rgba(255,255,255,0.08)_50%,transparent_75%)] bg-[length:240%_100%] bg-[position:100%_0] group-hover:bg-[position:0_0]" />

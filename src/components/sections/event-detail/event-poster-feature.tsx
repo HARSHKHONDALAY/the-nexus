@@ -58,7 +58,7 @@ export default function EventPosterFeature({ event }: EventPosterFeatureProps) {
             alt={poster.alt}
             sizes="(max-width: 1024px) 80vw, 360px"
             className="h-auto w-full rounded-[1.1rem]"
-            placeholder="blur"
+            
           />
         </motion.div>
       </div>

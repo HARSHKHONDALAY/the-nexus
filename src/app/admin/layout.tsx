@@ -10,17 +10,27 @@ export const metadata: Metadata = noIndexMetadata(
   "A private backstage operating system for premium event experiences.",
 );
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = await currentPathname();
-  if (pathname !== "/admin/login") {
-    const matchedPermission = Object.entries(adminRoutePermissions).find(
-      ([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-    );
-    await requireServerUser({
-      roles: ["SUPER_ADMIN", "CHESS_NEXUS_ADMIN", "ART_NEXUS_ADMIN"],
-      permissions: matchedPermission?.[1],
-    });
+
+  // DO NOT WRAP LOGIN PAGE
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
   }
+
+  const matchedPermission = Object.entries(adminRoutePermissions).find(
+    ([prefix]) =>
+      pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+
+  await requireServerUser({
+    roles: ["SUPER_ADMIN", "CHESS_NEXUS_ADMIN", "ART_NEXUS_ADMIN"],
+    permissions: matchedPermission?.[1],
+  });
 
   return (
     <AuthProvider>

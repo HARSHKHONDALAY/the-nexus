@@ -10,10 +10,23 @@ import { Button } from "@/components/shared/button";
 import type { EventData } from "@/lib/events";
 
 interface FeaturedEventProps {
-  event: EventData;
+  event: EventData | null | undefined;
 }
 
 export default function FeaturedEvent({ event }: FeaturedEventProps) {
+  // Defensive rendering guard - return empty state if no event
+  if (!event || !event.title) {
+    return (
+      <SectionWrapper spacing="default" blendTop blendBottom>
+        <div className="relative overflow-hidden rounded-[2rem] border border-lime-200/18 bg-lime-200/[0.04] p-8 md:p-12">
+          <div className="text-center text-lime-100/60">
+            <p>No featured event available</p>
+          </div>
+        </div>
+      </SectionWrapper>
+    );
+  }
+
   return (
     <SectionWrapper spacing="default" blendTop blendBottom>
       <motion.div
