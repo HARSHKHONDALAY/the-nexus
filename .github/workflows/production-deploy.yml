@@ -16,21 +16,21 @@ jobs:
   frontend-tests:
     name: Frontend Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -59,7 +59,7 @@ jobs:
   backend-tests:
     name: Backend Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,6 +76,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      - name: Make Maven wrapper executable
+        working-directory: ./backend
+        run: chmod +x mvnw
 
       - name: Run tests
         working-directory: ./backend
@@ -96,21 +100,21 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -128,6 +132,7 @@ jobs:
   database-tests:
     name: Database Tests
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:15
@@ -147,16 +152,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -177,7 +182,7 @@ jobs:
     needs: [frontend-tests, backend-tests, security-scan, database-tests]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     strategy:
       matrix:
         service: [frontend, backend]
@@ -219,7 +224,7 @@ jobs:
     needs: build-and-deploy
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -255,7 +260,7 @@ jobs:
     needs: deploy-production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
