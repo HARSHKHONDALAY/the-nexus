@@ -58,7 +58,9 @@ export default function ContactFormSection() {
                 <input
                   id={`${baseId}-name`}
                   name="name"
+                  autoComplete="name"
                   required
+                  minLength={2}
                   className="h-11 rounded-2xl border border-lime-300/22 bg-black/40 px-4 text-lime-50 outline-none transition focus:border-lime-300/45 focus:ring-2 focus:ring-lime-300/25"
                 />
               </label>
@@ -71,6 +73,7 @@ export default function ContactFormSection() {
                   id={`${baseId}-email`}
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   className="h-11 rounded-2xl border border-lime-300/22 bg-black/40 px-4 text-lime-50 outline-none transition focus:border-lime-300/45 focus:ring-2 focus:ring-lime-300/25"
                 />
@@ -85,6 +88,7 @@ export default function ContactFormSection() {
                 id={`${baseId}-subject`}
                 name="subject"
                 required
+                minLength={3}
                 className="h-11 rounded-2xl border border-lime-300/22 bg-black/40 px-4 text-lime-50 outline-none transition focus:border-lime-300/45 focus:ring-2 focus:ring-lime-300/25"
               />
             </label>
@@ -97,14 +101,15 @@ export default function ContactFormSection() {
                 id={`${baseId}-message`}
                 name="message"
                 required
+                minLength={10}
                 rows={6}
                 className="resize-none rounded-2xl border border-lime-300/22 bg-black/40 px-4 py-3 text-lime-50 outline-none transition focus:border-lime-300/45 focus:ring-2 focus:ring-lime-300/25"
               />
             </label>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-lime-100/45">
-                {state === "sent" ? "Message queued (demo)." : "We reply thoughtfully."}
+              <p className="text-xs uppercase tracking-[0.22em] text-lime-100/45" aria-live="polite">
+                {state === "sent" ? "Message noted. Connect mail delivery before launch." : "We reply thoughtfully."}
               </p>
               <Magnetic className="inline-block" strength={0.14}>
                 <Button type="submit" variant="primary" size="roomy" disabled={state === "sent"}>
@@ -118,4 +123,3 @@ export default function ContactFormSection() {
     </SectionWrapper>
   );
 }
-

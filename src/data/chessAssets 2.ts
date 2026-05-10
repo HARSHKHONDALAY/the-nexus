@@ -1,0 +1,155 @@
+import chessCommunity from "@/assets/events/chess-nexus/gallery/community-proof.jpg";
+import chessFloor from "@/assets/events/chess-nexus/gallery/chessThumbnail.jpg";
+import chessBoardFocus from "@/assets/events/chess-nexus/gallery/chessThumbnail.jpg";
+import chessTableTension from "@/assets/events/chess-nexus/gallery/chessThumbnail.jpg";
+import chessThumbnail from "@/assets/events/chess-nexus/thumbnails/chess-thumbnail-main.jpg";
+import chessSocial from "@/assets/events/chess-nexus/gallery/chessThumbnail.jpg";
+import type { EventAssetSet, ImageAsset } from "@/data/eventAssetTypes";
+
+const heroImages: ImageAsset[] = [
+  {
+    id: "chess-hero-key-visual",
+    src: chessCommunity,
+    alt: "The Chess Nexus community interaction visual",
+    label: "Community Showcase",
+    intent: "Strongest community interaction visual for immersive hero sections.",
+    orientation: "landscape",
+    aspectRatio: "2:1",
+    width: 1920,
+    height: 960,
+    quality: "strong",
+    suitability: ["hero", "landscape-gallery"],
+  },
+];
+
+const galleryImages: ImageAsset[] = [
+  {
+    id: "chess-main-floor",
+    src: chessFloor,
+    alt: "Players seated across a chess floor inside The Chess Nexus room",
+    label: "Main Floor",
+    intent: "Café atmosphere, active boards, and premium room texture.",
+    orientation: "landscape",
+    aspectRatio: "16:9",
+    width: 3840,
+    height: 2160,
+    quality: "strong",
+    suitability: ["gallery", "landscape-gallery"],
+    className: "md:col-span-7 md:row-span-2",
+  },
+  {
+    id: "chess-community-proof",
+    src: chessCommunity,
+    alt: "The Chess Nexus community gathered after a completed event",
+    label: "Community Proof",
+    intent: "Social proof and emotional payoff after the games finish.",
+    orientation: "landscape",
+    aspectRatio: "4:3",
+    width: 5712,
+    height: 4284,
+    quality: "excellent",
+    suitability: ["gallery", "landscape-gallery"],
+    className: "md:col-span-5",
+  },
+  {
+    id: "chess-social-signal",
+    src: chessSocial,
+    alt: "Guests smiling inside The Chess Nexus venue",
+    label: "Social Signal",
+    intent: "Warmth, confidence, and the social layer behind the board.",
+    orientation: "landscape",
+    aspectRatio: "16:9",
+    width: 4032,
+    height: 2268,
+    quality: "strong",
+    suitability: ["gallery", "landscape-gallery"],
+    className: "md:col-span-5",
+  },
+  {
+    id: "chess-board-focus",
+    src: chessBoardFocus,
+    alt: "A player studying a chess board during The Chess Nexus",
+    label: "Board Focus",
+    intent: "Quiet tension and the emotional second before a move.",
+    orientation: "portrait",
+    aspectRatio: "3:4",
+    width: 3000,
+    height: 4000,
+    quality: "strong",
+    suitability: ["gallery", "portrait-gallery"],
+    className: "md:col-span-4 md:row-span-2",
+  },
+  {
+    id: "chess-table-tension",
+    src: chessTableTension,
+    alt: "Two players leaning into a chess game at The Chess Nexus",
+    label: "Table Tension",
+    intent: "Close-range strategy with hospitality textures around the table.",
+    orientation: "portrait",
+    aspectRatio: "3:4",
+    width: 3000,
+    height: 4000,
+    quality: "strong",
+    suitability: ["gallery", "portrait-gallery"],
+    className: "md:col-span-8 md:row-span-2",
+  },
+];
+
+const thumbnails: ImageAsset[] = [
+  {
+    id: "chess-mark-thumbnail",
+    src: chessThumbnail,
+    alt: "The Chess Nexus chess mark",
+    label: "Chess Mark",
+    intent: "Square event-card identity mark for consistent previews.",
+    orientation: "square",
+    aspectRatio: "1:1",
+    width: 2820,
+    height: 2820,
+    quality: "excellent",
+    suitability: ["thumbnail"],
+  },
+];
+
+export const chessAssets: EventAssetSet = {
+  world: "The Chess Nexus",
+  tone: ["tension", "emotion", "cafe atmosphere", "premium chess culture", "social interaction"],
+  heroImages,
+  galleryImages,
+  portraitGallery: galleryImages.filter((asset) => asset.orientation === "portrait"),
+  landscapeGallery: galleryImages.filter((asset) => asset.orientation === "landscape"),
+  videos: [
+    {
+      id: "chess-room-pulse",
+      src: "/events/chess-nexus/videos/chess-room-pulse.mp4",
+      sourcePath: "src/assets/events/chess-nexus/videos/WhatsApp Video 2026-05-06 at 18.54.29.mp4",
+      label: "Room Pulse",
+      orientation: "landscape",
+      filesize: "850 KB",
+      usability: "background",
+      mobileStrategy: "avoid",
+    },
+    {
+      id: "chess-board-motion",
+      src: "/events/chess-nexus/videos/chess-board-motion.mp4",
+      sourcePath: "src/assets/events/chess-nexus/videos/WhatsApp Video 2026-05-06 at 18.54.38.mp4",
+      label: "Board Motion",
+      orientation: "landscape",
+      filesize: "220 KB",
+      usability: "supporting",
+      mobileStrategy: "metadata-only",
+    },
+    {
+      id: "chess-social-floor",
+      src: "/events/chess-nexus/videos/chess-social-floor.mp4",
+      sourcePath: "src/assets/events/chess-nexus/videos/WhatsApp Video 2026-05-06 at 18.54.47.mp4",
+      label: "Social Floor",
+      orientation: "landscape",
+      filesize: "413 KB",
+      usability: "supporting",
+      mobileStrategy: "metadata-only",
+    },
+  ],
+  thumbnails,
+  posters: [],
+};

@@ -7,16 +7,16 @@ import SectionHeading from "@/components/shared/section-heading";
 
 const editorialStories = [
   {
-    title: "Inside the Chess Nexus",
-    type: "Cultural essay",
+    title: "Why a chess board makes strangers talk faster",
+    type: "Chess Nexus field note",
   },
   {
-    title: "Creators on Community Architecture",
-    type: "Studio conversation",
+    title: "The quiet confidence of making art beside someone",
+    type: "Art Nexus room note",
   },
   {
-    title: "Building Social Rooms That Matter",
-    type: "Field notes",
+    title: "How Mumbai finds softness after work",
+    type: "City culture letter",
   },
 ];
 
@@ -24,9 +24,9 @@ export default function EditorialShowcase() {
   return (
     <SectionWrapper id="editorial-showcase" spacing="default" blendTop blendBottom>
       <SectionHeading
-        eyebrow="Editorial Showcase"
-        title="Stories, perspectives, and culture reports from inside the ecosystem."
-        description="The Nexus editorial layer captures the meaning behind the moments, shaping a shared cultural memory."
+        eyebrow="Cultural Memory"
+        title="Every room leaves behind a story people can recognise themselves in."
+        description="The Nexus documents not just what happened, but how it felt: the table energy, the new friendships, the rituals, and the small social details that make a city feel less anonymous."
       />
 
       <div className="mt-14 grid gap-5 md:mt-16 md:grid-cols-12">
@@ -41,14 +41,15 @@ export default function EditorialShowcase() {
           <div className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 bg-[linear-gradient(120deg,transparent_25%,rgba(255,255,255,0.08)_50%,transparent_75%)] bg-[length:240%_100%] bg-[position:100%_0] group-hover:bg-[position:0_0]" />
           <div className="relative z-10">
             <p className="text-xs uppercase tracking-[0.32em] text-lime-100/48">
-              Longform Feature
+              Founder Note
             </p>
             <h3 className="mt-6 max-w-[24ch] text-3xl font-semibold leading-tight tracking-tight text-lime-50 md:text-4xl">
-              Why belonging is the most important product decision in modern community.
+              We are not building events. We are building rooms people can emotionally return to.
             </h3>
             <p className="mt-5 max-w-[52ch] text-base leading-relaxed text-lime-100/62 md:text-lg">
-              A deep dive into how curation, emotional design, and identity-led
-              rooms create a premium social experience people return to.
+              In a city full of plans, The Nexus is designed for something more
+              lasting: familiar faces, hosted warmth, and subcultures that feel
+              premium without becoming cold.
             </p>
           </div>
         </motion.article>

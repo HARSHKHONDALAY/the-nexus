@@ -1,7 +1,9 @@
-"use client";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
-import { motion } from "framer-motion";
-
+import { Button } from "@/components/shared/button";
+import { getPrimaryHeroImage } from "@/lib/event-media";
 import type { EventData } from "@/lib/events";
 
 interface EventHeroProps {
@@ -9,18 +11,24 @@ interface EventHeroProps {
 }
 
 export default function EventHero({ event }: EventHeroProps) {
+  const heroImage = getPrimaryHeroImage(event);
+
   return (
     <section className="relative isolate min-h-[92vh] overflow-hidden bg-black">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_20%,rgba(139,92,246,0.22),transparent_42%),radial-gradient(circle_at_16%_16%,rgba(59,130,246,0.14),transparent_35%)]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black" />
+      <Image
+        src={heroImage.src}
+        alt={heroImage.alt}
+        fill
+        priority
+        quality={75}
+        sizes="100vw"
+        className="object-cover opacity-78 saturate-[0.82] contrast-[1.04]"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.94),rgba(2,8,23,0.66)_42%,rgba(2,8,23,0.30)_72%,rgba(0,0,0,0.76))]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-black" />
 
       <div className="container-custom relative z-10 flex min-h-[92vh] items-end pb-20 pt-40 md:pb-24">
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-5xl"
-        >
+        <div className="max-w-5xl">
           <p className="text-xs uppercase tracking-[0.38em] text-white/50 md:text-sm">
             {event.world}
           </p>
@@ -39,10 +47,19 @@ export default function EventHero({ event }: EventHeroProps) {
               {event.time}
             </span>
             <span className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2">
-              {event.city}
+              {event.remainingSpots} spots left
             </span>
           </div>
-        </motion.div>
+
+          <div className="mt-9 flex flex-wrap items-center gap-3">
+            <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
+              <Link href={`/register/${event.eventKey}`}>Buy Tickets</Link>
+            </Button>
+            <Button asChild variant="secondary" size="roomy">
+              <Link href="#registration">View Ticket Tiers</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );

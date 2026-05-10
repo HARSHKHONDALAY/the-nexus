@@ -16,8 +16,8 @@ export default function CommunityEnergy() {
     >
       <SectionHeading
         eyebrow="Community Energy"
-        title="A living signal shaped by people, not algorithms."
-        description="From intimate room conversations to large collective nights, the energy evolves through community participation."
+        title="The feeling is simple: yeh jagah apni lagti hai."
+        description="Not because the room is loud. Because the hosting is warm, the crowd has taste, and the night leaves people with someone to look for again."
       />
 
       <div className="mt-14 grid gap-5 md:mt-16 md:grid-cols-12">
@@ -38,15 +38,16 @@ export default function CommunityEnergy() {
           />
           <div className="relative z-10">
             <p className="text-xs uppercase tracking-[0.34em] text-lime-100/48">
-              This Week at The Nexus
+              What Actually Happens
             </p>
             <h3 className="mt-5 max-w-[24ch] text-3xl font-semibold leading-tight tracking-tight text-lime-50 md:text-4xl">
-              4 culture worlds, 12 curated rooms, one shared sense of belonging.
+              People arrive as guests. By the second round or the second brushstroke, the room starts remembering them.
             </h3>
             <p className="mt-5 max-w-[48ch] text-base leading-relaxed text-lime-100/62 md:text-lg">
-              Members move between chess salons, creator workshops, art
-              dialogues, and social evenings as one ecosystem, each room adding
-              to a larger cultural narrative.
+              A first-timer gets paired gently. A regular introduces two people
+              who should have met already. Someone loses a blitz game, laughs
+              too loudly, and stays for the conversation. This is the premium
+              layer we care about: not performance, but chemistry.
             </p>
           </div>
         </motion.div>
@@ -65,20 +66,20 @@ export default function CommunityEnergy() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(124,58,237,0.2),transparent_44%)]" />
           <div className="relative z-10">
             <p className="text-xs uppercase tracking-[0.3em] text-lime-100/48">
-              Live Pulse
+              Social Proof
             </p>
             <ul className="mt-6 space-y-6">
               <li>
-                <p className="text-3xl font-semibold tracking-tight text-lime-50">20K+</p>
-                <p className="mt-1 text-sm text-lime-100/58">Community reach</p>
+                <p className="text-3xl font-semibold tracking-tight text-lime-50">Solo-friendly</p>
+                <p className="mt-1 text-sm text-lime-100/58">Hosted entry and warm pairing</p>
               </li>
               <li>
-                <p className="text-3xl font-semibold tracking-tight text-lime-50">150+</p>
-                <p className="mt-1 text-sm text-lime-100/58">Curated experiences</p>
+                <p className="text-3xl font-semibold tracking-tight text-lime-50">Repeat faces</p>
+                <p className="mt-1 text-sm text-lime-100/58">People come back across formats</p>
               </li>
               <li>
-                <p className="text-3xl font-semibold tracking-tight text-lime-50">4</p>
-                <p className="mt-1 text-sm text-lime-100/58">Identity worlds</p>
+                <p className="text-3xl font-semibold tracking-tight text-lime-50">Curated rooms</p>
+                <p className="mt-1 text-sm text-lime-100/58">Premium, safe, intentional</p>
               </li>
             </ul>
           </div>

@@ -1,0 +1,429 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'The Nexus - AWS WAF and Security Configuration'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+
+Resources:
+  # WAF Web ACL
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub '${Environment}-thenexus-waf'
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      Rules:
+        # Rate limiting rules
+        - Name: RateLimitRule
+          Priority: 1
+          Statement:
+            RateBasedStatement:
+              Limit: 2000
+              AggregateKeyType: IP
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimitRule
+
+        # SQL Injection protection
+        - Name: SQLInjectionRule
+          Priority: 2
+          Statement:
+            SqliMatchStatement:
+              FieldToMatch:
+                Body: {}
+                QueryString: {}
+                Headers:
+                  - Name: Authorization
+                  - Name: Cookie
+              TextTransformations:
+                - URL_DECODE
+                - HTML_ENTITY_DECODE
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: SQLInjectionRule
+
+        # XSS protection
+        - Name: XSSRule
+          Priority: 3
+          Statement:
+            XssMatchStatement:
+              FieldToMatch:
+                Body: {}
+                QueryString: {}
+              TextTransformations:
+                - URL_DECODE
+                - HTML_ENTITY_DECODE
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: XSSRule
+
+        # Bad bot protection
+        - Name: BadBotRule
+          Priority: 4
+          Statement:
+            NotStatement:
+              Statement:
+                ByteMatchStatement:
+                  FieldToMatch:
+                    Headers:
+                      - Name: User-Agent
+                  PositionalConstraint: CONTAINS
+                  SearchString: "Mozilla"
+                  TextTransformations:
+                    - NONE
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: BadBotRule
+
+        # Geographic blocking (optional)
+        - Name: GeoBlockRule
+          Priority: 5
+          Statement:
+            NotStatement:
+              Statement:
+                GeoMatchStatement:
+                  CountryCodes:
+                    - US
+                    - CA
+                    - GB
+                    - AU
+                    - NZ
+                    - DE
+                    - FR
+                    - JP
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: GeoBlockRule
+
+        # API rate limiting
+        - Name: APIRateLimitRule
+          Priority: 6
+          Statement:
+            AndStatement:
+              Statements:
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      UriPath: {}
+                    PositionalConstraint: STARTS_WITH
+                    SearchString: "/api/"
+                    TextTransformations:
+                      - LOWERCASE
+                - RateBasedStatement:
+                    Limit: 100
+                    AggregateKeyType: IP
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: APIRateLimitRule
+
+        # Auth endpoint protection
+        - Name: AuthRateLimitRule
+          Priority: 7
+          Statement:
+            AndStatement:
+              Statements:
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      UriPath: {}
+                    PositionalConstraint: STARTS_WITH
+                    SearchString: "/api/auth"
+                    TextTransformations:
+                      - LOWERCASE
+                - RateBasedStatement:
+                    Limit: 20
+                    AggregateKeyType: IP
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AuthRateLimitRule
+
+        # Booking endpoint protection
+        - Name: BookingRateLimitRule
+          Priority: 8
+          Statement:
+            AndStatement:
+              Statements:
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      UriPath: {}
+                    PositionalConstraint: STARTS_WITH
+                    SearchString: "/api/bookings"
+                    TextTransformations:
+                      - LOWERCASE
+                - RateBasedStatement:
+                    Limit: 50
+                    AggregateKeyType: IP
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: BookingRateLimitRule
+
+        # Payment endpoint protection
+        - Name: PaymentRateLimitRule
+          Priority: 9
+          Statement:
+            AndStatement:
+              Statements:
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      UriPath: {}
+                    PositionalConstraint: STARTS_WITH
+                    SearchString: "/api/payments"
+                    TextTransformations:
+                      - LOWERCASE
+                - RateBasedStatement:
+                    Limit: 10
+                    AggregateKeyType: IP
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: PaymentRateLimitRule
+
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: WebACL
+
+  # IP Set for known malicious IPs
+  MaliciousIPSet:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Name: !Sub '${Environment}-thenexus-malicious-ips'
+      Scope: CLOUDFRONT
+      IPAddressVersion: IPV4
+      Addresses: []
+
+  # Rule for malicious IPs
+  MaliciousIPRule:
+    Type: AWS::WAFv2::RuleGroup
+    Properties:
+      Name: !Sub '${Environment}-thenexus-malicious-ip-rule'
+      Scope: CLOUDFRONT
+      Capacity: 100
+      Rules:
+        - Name: MaliciousIPRule
+          Priority: 1
+          Action:
+            Block: {}
+          Statement:
+            IPSetReferenceStatement:
+              ARN: !GetAtt MaliciousIPSet.Arn
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: MaliciousIPRule
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: MaliciousIPRuleGroup
+
+  # CloudFront distribution association
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+      WebACLArn: !GetAtt WebACL.Arn
+
+  # CloudWatch alarms for WAF
+  WAFBlockedRequestsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-thenexus-waf-blocked-requests'
+      AlarmDescription: 'High rate of blocked requests by WAF'
+      MetricName: BlockedRequests
+      Namespace: 'AWS/WAFV2'
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 100
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: WebACL
+          Value: !Ref WebACL
+      AlarmActions:
+        - !Ref SNSTopicArn
+
+  # SQL Injection alarm
+  SQLInjectionAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-thenexus-sql-injection-attempts'
+      AlarmDescription: 'SQL injection attempts detected'
+      MetricName: SQLInjectionRule
+      Namespace: 'AWS/WAFV2'
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: WebACL
+          Value: !Ref WebACL
+      AlarmActions:
+        - !Ref SNSTopicArn
+
+  # XSS attack alarm
+  XSSAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-thenexus-xss-attempts'
+      AlarmDescription: 'XSS attempts detected'
+      MetricName: XSSRule
+      Namespace: 'AWS/WAFV2'
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: WebACL
+          Value: !Ref WebACL
+      AlarmActions:
+        - !Ref SNSTopicArn
+
+  # Rate limiting alarm
+  RateLimitAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-thenexus-rate-limit-exceeded'
+      AlarmDescription: 'Rate limiting threshold exceeded'
+      MetricName: RateLimitRule
+      Namespace: 'AWS/WAFV2'
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 50
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: WebACL
+          Value: !Ref WebACL
+      AlarmActions:
+        - !Ref SNSTopicArn
+
+  # SNS topic for security alerts
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${Environment}-thenexus-security-alerts'
+      DisplayName: 'Security Alerts'
+
+  # SNS subscription for email alerts
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn: !Ref SNSTopic
+      Endpoint: !Ref SecurityAlertEmail
+
+  # Lambda function for IP reputation checking
+  IPReputationLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Environment}-thenexus-ip-reputation'
+      Runtime: python3.11
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import requests
+          
+          def lambda_handler(event, context):
+              # Check IP reputation
+              for record in event['Records']:
+                  if 'webaclId' in record:
+                      # Add malicious IP checking logic here
+                      pass
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps('IP reputation check completed')
+              }
+      Environment:
+        Variables:
+          THREAT_INTEL_API_KEY: !Ref ThreatIntelAPIKey
+
+  # Lambda execution role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-thenexus-waf-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: WAFLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - wafv2:GetWebACL
+                  - wafv2:UpdateWebACL
+                  - wafv2:ListResourcesForWebACL
+                Resource: '*'
+
+Parameters:
+  SecurityAlertEmail:
+    Type: String
+    Default: security@thenexus.com
+    Description: 'Email address for security alerts'
+
+  ThreatIntelAPIKey:
+    Type: String
+    Default: ''
+    Description: 'API key for threat intelligence service'
+    NoEcho: true
+
+Outputs:
+  WebACLArn:
+    Description: 'WAF WebACL ARN'
+    Value: !GetAtt WebACL.Arn
+    Export:
+      Name: !Sub '${Environment}-WebACLArn'
+
+  MaliciousIPSetArn:
+    Description: 'Malicious IP Set ARN'
+    Value: !GetAtt MaliciousIPSet.Arn
+    Export:
+      Name: !Sub '${Environment}-MaliciousIPSetArn'
+
+  SNSTopicArn:
+    Description: 'Security alerts SNS topic ARN'
+    Value: !Ref SNSTopic
+    Export:
+      Name: !Sub '${Environment}-SecuritySNSTopicArn'

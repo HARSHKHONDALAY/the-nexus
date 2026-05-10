@@ -52,11 +52,11 @@ export const events: EventData[] = [
     eventKey: "checkmate-chaos",
     title: "Checkmate Chaos",
     world: "The Chess Nexus",
-    mood: "Collective intensity",
+    mood: "Warm rivalry after dark",
     dateISO: "2026-05-23T21:00:00+05:30",
     type: "Night",
     featured: true,
-    tagline: "A high-voltage chess night where sound, strategy, and social energy collide.",
+    tagline: "A high-voltage chess night for sharp minds, warm rivalry, and Mumbai after dark.",
     date: "Saturday, 23 May 2026",
     time: "9:00 PM - 1:00 AM",
     venue: "Coast & Bloom, Dadar",
@@ -67,20 +67,20 @@ export const events: EventData[] = [
     agePolicy: "21+",
     priceFrom: "INR 600",
     description:
-      "A collective chess experience designed for modern culture energy.",
+      "A chess night where competition becomes conversation.",
     longDescription:
-      "Checkmate Chaos is built as a cinematic chess night—rapid pairings, hosted rituals, and social momentum designed for people who want strategic play with cultural electricity. It is not a tournament boardroom; it is an immersive room where thought, rhythm, and connection meet.",
+      "Checkmate Chaos is not a silent tournament hall. It is a hosted chess room with rapid pairings, music-led momentum, and the kind of table energy where a lost game can become a new friendship. Come for the board. Stay because the room starts feeling familiar.",
     gallery: ["Main floor boards", "Sound-led pairing zone", "After-hours social lounge"],
     vibePoints: [
-      "High-energy, curated flow",
-      "Hosted pairings and social pacing",
-      "Collective room electricity",
+      "Warm rivalry without intimidating tournament energy",
+      "Hosted pairings so solo guests are folded into the room",
+      "After-game conversations that carry beyond the board",
     ],
     timeline: [
       {
         time: "9:00 PM",
-        title: "Arrival and House Calibration",
-        description: "Check-in, sound build, and host-led room briefing.",
+        title: "Arrival and Hosted Entry",
+        description: "Check-in, first introductions, and a clear sense of how the room flows.",
       },
       {
         time: "9:45 PM",
@@ -89,8 +89,8 @@ export const events: EventData[] = [
       },
       {
         time: "11:15 PM",
-        title: "Collective Interlude",
-        description: "Open floor rhythm and curated community moments.",
+        title: "Social Interlude",
+        description: "A pause for drinks, introductions, and the conversations that start after a close game.",
       },
       {
         time: "12:20 AM",
@@ -102,7 +102,7 @@ export const events: EventData[] = [
       {
         question: "Do I need to be highly competitive?",
         answer:
-          "No. The format balances social flow with strategic play at mixed levels.",
+          "No. The format balances social flow with strategic play at mixed levels. You can be sharp without being intense.",
       },
       {
         question: "Are boards provided?",
@@ -125,10 +125,10 @@ export const events: EventData[] = [
     eventKey: "chess-social-night",
     title: "Chess Social Night",
     world: "The Chess Nexus",
-    mood: "Warm strategic social",
+    mood: "Cafe-table strategy",
     dateISO: "2026-05-30T21:00:00+05:30",
     type: "Session",
-    tagline: "An intimate chess social night built for conversation and connection.",
+    tagline: "An intimate chess social where the board gives people an easy reason to meet.",
     date: "Saturday, 30 May 2026",
     time: "9:00 PM - 12:30 AM",
     venue: "Bustling Brew Cafe, Thane",
@@ -139,20 +139,20 @@ export const events: EventData[] = [
     agePolicy: "21+",
     priceFrom: "INR 600",
     description:
-      "A conversation-first chess gathering for community-led culture.",
+      "A conversation-first chess gathering for people who like thoughtful company.",
     longDescription:
-      "Chess Social Night is a curated format for relaxed strategic play and social connection. It emphasizes hosted introductions, inclusive pairings, and slower premium pacing that turns a chess night into a community ritual.",
+      "Chess Social Night is slower, warmer, and more personal. The format is made for cafe-culture chess: hosted introductions, inclusive pairings, and enough breathing room for conversations between rounds. It is designed so coming alone feels natural, not brave.",
     gallery: ["Social chess lounge", "Hosted pairings", "Cafe floor atmosphere"],
     vibePoints: [
-      "Conversation-first energy",
-      "Curated pairing rhythm",
-      "Belonging-led hosting",
+      "Conversation-first chess with gentle competitive rhythm",
+      "Curated pairings that make solo attendance easy",
+      "A premium cafe-room mood with repeat-face familiarity",
     ],
     timeline: [
       {
         time: "9:00 PM",
         title: "Arrival and Introductions",
-        description: "Hosted intros and floor calibration.",
+        description: "Hosted intros, seating support, and first pairings.",
       },
       {
         time: "9:40 PM",
@@ -162,7 +162,7 @@ export const events: EventData[] = [
       {
         time: "11:00 PM",
         title: "Social Interlude",
-        description: "Open connection block with host prompts.",
+        description: "Open connection block for conversations, rematches, and new tables.",
       },
       {
         time: "11:45 PM",
@@ -174,7 +174,7 @@ export const events: EventData[] = [
       {
         question: "Can I attend solo?",
         answer:
-          "Yes. This format is designed to be welcoming for solo attendees.",
+          "Yes. This format is designed around solo comfort, hosted entry, and easy introductions.",
       },
     ],
     ticketTiers: [
@@ -192,10 +192,10 @@ export const events: EventData[] = [
     eventKey: "texture-painting",
     title: "Texture Painting",
     world: "The Art Nexus",
-    mood: "Immersive creative calm",
+    mood: "Soft creative intimacy",
     dateISO: "2026-05-16T18:30:00+05:30",
     type: "Experience",
-    tagline: "A guided art ritual built around tactile expression and shared creation.",
+    tagline: "A guided texture-painting room for expression, conversation, and slow evening calm.",
     date: "Saturday, 16 May 2026",
     time: "6:30 PM - 10:30 PM",
     venue: "Coast & Bloom, Dadar",
@@ -205,19 +205,23 @@ export const events: EventData[] = [
     dressCode: "Contemporary evening",
     agePolicy: "21+",
     priceFrom: "INR 1,199",
-    description: "A premium texture-painting experience with guided storytelling and atmosphere.",
+    description: "An art room where people loosen up without needing to be artists.",
     longDescription:
-      "Texture Painting is curated as a cinematic creative room. Guests move through guided prompts, tactile material exploration, and social reflection moments. The format is intentionally calm, premium, and community-first.",
+      "Texture Painting is a softer Nexus room: guided, tactile, and emotionally open. Guests move through materials, prompts, and small table conversations at a pace that lets the city fall away. You do not need skill. You need curiosity, a little presence, and willingness to make something with people around you.",
     gallery: ["Texture table setup", "Guided painting ritual", "Creative social floor"],
-    vibePoints: ["Slow premium pacing", "Guided creative expression", "Community artistry"],
+    vibePoints: [
+      "Beginner-friendly guidance with a premium table setup",
+      "Soft social prompts that make conversation feel natural",
+      "A take-home artwork tied to a real evening memory",
+    ],
     timeline: [
-      { time: "6:30 PM", title: "Arrival Frames", description: "Guest arrival and material briefing." },
-      { time: "7:15 PM", title: "Guided Texture Session", description: "Host-led creative immersion." },
-      { time: "8:45 PM", title: "Social Reflection", description: "Conversation and community exchange." },
-      { time: "9:30 PM", title: "Open Creative Block", description: "Final personal work and floor close." },
+      { time: "6:30 PM", title: "Arrival Frames", description: "Guest arrival, table settling, and material briefing." },
+      { time: "7:15 PM", title: "Guided Texture Session", description: "Host-led creative immersion with beginner-friendly prompts." },
+      { time: "8:45 PM", title: "Social Reflection", description: "Conversation, table sharing, and community exchange." },
+      { time: "9:30 PM", title: "Open Creative Block", description: "Final personal work, photos, and a soft floor close." },
     ],
     faqs: [
-      { question: "Do I need painting experience?", answer: "No. The format is beginner-friendly and guided." },
+      { question: "Do I need painting experience?", answer: "No. The format is beginner-friendly, guided, and built for people who simply want to express." },
       { question: "Are materials included?", answer: "Yes. All materials are provided on-site." },
     ],
     ticketTiers: [

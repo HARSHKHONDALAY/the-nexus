@@ -16,7 +16,7 @@ export default function RelatedEvents({ currentEvent }: RelatedEventsProps) {
   return (
     <SectionWrapper spacing="default">
       <div className="mb-12 md:mb-14">
-        <p className="text-xs uppercase tracking-[0.34em] text-white/45">Related Events</p>
+        <h2 className="text-xs uppercase tracking-[0.34em] text-white/60">Related Events</h2>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">
@@ -29,7 +29,7 @@ export default function RelatedEvents({ currentEvent }: RelatedEventsProps) {
             viewport={{ once: true, amount: 0.3 }}
             className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 md:p-9"
           >
-            <p className="text-xs uppercase tracking-[0.3em] text-white/45">{event.world}</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">{event.world}</p>
             <h3 className="mt-4 text-3xl font-semibold tracking-tight">{event.title}</h3>
             <p className="mt-3 text-white/62">{event.tagline}</p>
             <Link

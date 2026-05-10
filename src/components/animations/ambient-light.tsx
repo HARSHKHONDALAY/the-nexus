@@ -1,7 +1,6 @@
 export default function AmbientLight() {
   return (
     <>
-      {/* Top Glow */}
       <div
         className="
           pointer-events-none
@@ -18,17 +17,16 @@ export default function AmbientLight() {
         "
       />
 
-      {/* Bottom Glow */}
       <div
         className="
           pointer-events-none
           fixed
-          bottom-[-300px]
-          right-[-100px]
-          h-[400px]
-          w-[400px]
+          bottom-[-18.75rem]
+          right-[-6.25rem]
+          h-[25rem]
+          w-[25rem]
           rounded-full
-          bg-purple-500/10
+          bg-cyan-400/10
           blur-[140px]
           z-0
         "

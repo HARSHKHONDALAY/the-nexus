@@ -7,11 +7,11 @@ import SectionWrapper from "@/components/layout/section-wrapper";
 const worlds = [
   {
     title: "The Chess Nexus",
-    note: "Strategic culture rooms and social ritual nights.",
+    note: "Warm rivalry, cafe-table strategy, hosted pairings, and people who enjoy thinking out loud.",
   },
   {
     title: "The Art Nexus",
-    note: "Visual dialogue spaces and immersive creative salons.",
+    note: "Soft creative rooms where expression feels guided, social, and emotionally easy.",
   },
 ];
 
@@ -25,8 +25,11 @@ export default function CultureWorldsStrip() {
     >
       <div className="mb-9">
         <p className="text-xs uppercase tracking-[0.34em] text-lime-100/48">
-          Culture Worlds
+          The Nexus Ecosystem
         </p>
+        <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-lime-50 md:text-5xl">
+          One parent house. Distinct rooms. More worlds coming.
+        </h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

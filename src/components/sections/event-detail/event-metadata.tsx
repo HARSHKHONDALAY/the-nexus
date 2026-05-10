@@ -23,7 +23,7 @@ export default function EventMetadata({ event }: EventMetadataProps) {
             key={item.label}
             className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-7"
           >
-            <p className="text-xs uppercase tracking-[0.28em] text-white/45">
+            <p className="text-xs uppercase tracking-[0.28em] text-white/60">
               {item.label}
             </p>
             <p className="mt-4 text-lg leading-snug text-white/90 md:text-xl">

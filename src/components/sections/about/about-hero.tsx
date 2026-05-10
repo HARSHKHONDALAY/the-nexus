@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 export default function AboutHero() {
   return (
     <section className="relative isolate min-h-[72vh] overflow-hidden bg-black">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(145,255,98,0.16),transparent_38%),radial-gradient(circle_at_76%_24%,rgba(173,216,255,0.1),transparent_34%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(56,189,248,0.16),transparent_38%),radial-gradient(circle_at_76%_24%,rgba(173,216,255,0.1),transparent_34%)]" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/28 to-black" />
 
       <div className="container-custom relative z-10 flex min-h-[72vh] items-end pb-16 pt-36 md:pb-20">

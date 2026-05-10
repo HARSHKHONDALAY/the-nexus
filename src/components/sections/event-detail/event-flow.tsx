@@ -14,9 +14,9 @@ export default function EventFlow({ event }: EventFlowProps) {
       blendBottom
     >
       <div className="mb-12 md:mb-14">
-        <p className="text-xs uppercase tracking-[0.34em] text-white/45">
+        <h2 className="text-xs uppercase tracking-[0.34em] text-white/60">
           Schedule / Experience Flow
-        </p>
+        </h2>
       </div>
 
       <ol className="grid gap-4">
@@ -30,7 +30,7 @@ export default function EventFlow({ event }: EventFlowProps) {
                 {item.time}
               </p>
               <div className="md:col-span-9">
-                <h4 className="text-2xl font-semibold tracking-tight">{`${index + 1}. ${item.title}`}</h4>
+                <h3 className="text-2xl font-semibold tracking-tight">{`${index + 1}. ${item.title}`}</h3>
                 <p className="mt-3 text-white/62">{item.description}</p>
               </div>
             </div>

@@ -10,19 +10,19 @@ export default function SectionHeading({
   description,
 }: SectionHeadingProps) {
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-[46rem]">
       {eyebrow && (
-        <p className="mb-4 text-xs uppercase tracking-[0.34em] text-lime-100/48 md:text-sm">
+        <p className="editorial-kicker mb-4 text-lime-100/48 md:text-sm">
           {eyebrow}
         </p>
       )}
 
-      <h2 className="font-serif text-4xl font-medium leading-[1.02] tracking-[-0.02em] text-lime-50 md:text-6xl">
+      <h2 className="font-serif text-[2.4rem] font-medium leading-[0.98] tracking-[-0.035em] text-lime-50 sm:text-[2.9rem] md:text-[4.2rem]">
         {title}
       </h2>
 
       {description && (
-        <p className="mt-6 text-base leading-relaxed text-lime-100/62 md:text-lg">
+        <p className="mt-5 max-w-[40rem] text-[0.98rem] leading-7 text-lime-100/62 md:mt-6 md:text-[1.05rem]">
           {description}
         </p>
       )}

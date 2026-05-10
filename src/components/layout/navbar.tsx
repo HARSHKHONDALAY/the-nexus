@@ -1,116 +1,69 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/shared/button";
-import { events } from "@/lib/events";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isEventsOpen, setIsEventsOpen] = useState(false);
   const links = [
-    { label: "Worlds", href: "/worlds" },
+    { label: "Events", href: "/events" },
     { label: "Moments", href: "/moments" },
     { label: "About", href: "/about" },
-    { label: "Join", href: "/join" },
     { label: "Contact", href: "/contact" },
   ];
 
   const closeMenu = () => setIsMenuOpen(false);
   const isActive = (href: string) => pathname === href;
-  const isEventsActive = pathname === "/events" || pathname.startsWith("/events/");
 
   return (
-    <header className="fixed top-0 z-50 w-full">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/90 via-black/55 to-transparent" />
+    <header className="fixed top-0 z-50 w-full transition-all duration-500 ease-out backdrop-blur-xl bg-black/40 supports-[backdrop-filter]:bg-black/30 hover:bg-black/50">
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.92),rgba(2,8,23,0.62)_58%,transparent)]" />
 
       <div className="container-custom relative">
-        <div className="tone-panel mt-4 rounded-2xl px-5 backdrop-blur-2xl md:px-8">
-          <div className="flex h-[4.5rem] items-center justify-between md:h-20">
-            <Link href="/" className="group">
-              <span className="block text-[0.64rem] uppercase tracking-[0.42em] text-lime-100/48 transition group-hover:text-lime-50/90">
-                Culture House
-              </span>
-              <h1 className="font-serif text-lg tracking-[0.02em] text-lime-50 md:text-[1.28rem]">
-                The Nexus
-              </h1>
+        <div className="relative mt-3 overflow-hidden rounded-2xl border border-cyan-200/12 bg-black/38 px-4 shadow-[0_18px_70px_rgba(8,47,73,0.28)] backdrop-blur-2xl supports-[backdrop-filter]:bg-black/28 md:mt-4 md:px-7">
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/45 to-transparent animate-pulse-slow" />
+          <div className="pointer-events-none absolute -left-12 top-1/2 h-24 w-44 -translate-y-1/2 rounded-full bg-cyan-300/10 blur-3xl" />
+
+          <div className="relative flex h-[4.25rem] items-center justify-between gap-4 md:h-20">
+            <Link
+              href="/"
+              className="group relative -ml-1 flex shrink-0 items-center outline-none"
+              aria-label="The Nexus home"
+              onClick={closeMenu}
+            >
+              <span className="absolute -inset-3 rounded-full bg-cyan-300/0 blur-2xl transition duration-500 group-hover:bg-cyan-300/16 group-focus-visible:bg-cyan-300/16" />
+              <Image
+                src="/branding/logo.png"
+                alt="The Nexus"
+                width={707}
+                height={353}
+                priority
+                sizes="(max-width: 640px) 132px, (max-width: 1024px) 152px, 172px"
+                className="relative h-auto w-[132px] object-contain drop-shadow-[0_0_18px_rgba(125,211,252,0.12)] transition duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-[1.025] group-hover:drop-shadow-[0_0_28px_rgba(125,211,252,0.30)] group-focus-visible:-translate-y-0.5 group-focus-visible:scale-[1.025] sm:w-[148px] lg:w-[172px]"
+              />
             </Link>
 
-            <nav className="hidden items-center gap-10 text-xs uppercase tracking-[0.2em] text-lime-100/64 md:flex">
+            <nav className="hidden items-center gap-7 text-[0.72rem] uppercase tracking-[0.16em] text-cyan-50/62 lg:flex xl:gap-10">
               <Link
                 href="/"
-                className={`relative py-2 transition ${
-                  pathname === "/" ? "text-lime-50" : "hover:text-lime-50"
+                className={`relative py-2 transition duration-300 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-center after:scale-x-0 after:bg-cyan-200/80 after:transition-transform ${
+                  pathname === "/" ? "text-cyan-50 after:scale-x-100" : "hover:text-cyan-50 hover:after:scale-x-100"
                 }`}
               >
                 Home
               </Link>
 
-              <div
-                className="relative"
-                onMouseEnter={() => setIsEventsOpen(true)}
-                onMouseLeave={() => setIsEventsOpen(false)}
-              >
-                <button
-                  type="button"
-                  onClick={() => setIsEventsOpen((prev) => !prev)}
-                  aria-haspopup="menu"
-                  aria-expanded={isEventsOpen}
-                  className={`inline-flex items-center gap-2 py-2 transition ${
-                    isEventsActive ? "text-lime-50" : "hover:text-lime-50"
-                  }`}
-                >
-                  Events <ChevronDown size={14} className="opacity-70" />
-                </button>
-
-                {isEventsOpen ? (
-                  <div
-                    role="menu"
-                    className="absolute left-0 top-full mt-3 w-[360px] overflow-hidden rounded-2xl border border-lime-300/26 bg-black/90 p-3 shadow-[0_30px_80px_rgba(0,0,0,0.65)] backdrop-blur-2xl"
-                  >
-                    <Link
-                      role="menuitem"
-                      href="/events"
-                      className="block rounded-xl border border-lime-300/18 bg-lime-300/[0.06] px-4 py-3 text-[0.7rem] uppercase tracking-[0.22em] text-lime-50 transition hover:border-lime-300/35 hover:bg-lime-300/[0.12]"
-                    >
-                      View All Experiences
-                    </Link>
-
-                    <div className="mt-3">
-                      <p className="px-2 py-2 text-[0.62rem] uppercase tracking-[0.28em] text-lime-100/55">
-                        Event Pages
-                      </p>
-                      <div className="space-y-1">
-                        {events.map((event) => (
-                          <Link
-                            key={event.slug}
-                            role="menuitem"
-                            href={`/events/${event.slug}`}
-                            className="block rounded-xl px-3 py-3 transition hover:bg-lime-300/[0.12]"
-                          >
-                            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-lime-50">
-                              {event.title}
-                            </p>
-                            <p className="mt-1 text-[0.68rem] text-lime-100/62">
-                              {event.world} · {event.date}
-                            </p>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
               {links.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`relative py-2 transition ${
-                    isActive(link.href) ? "text-lime-50" : "hover:text-lime-50"
+                  className={`relative py-2 transition duration-300 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-center after:scale-x-0 after:bg-cyan-200/80 after:transition-transform ${
+                    isActive(link.href) ? "text-cyan-50 after:scale-x-100" : "hover:text-cyan-50 hover:after:scale-x-100"
                   }`}
                 >
                   {link.label}
@@ -120,18 +73,22 @@ export default function Navbar() {
 
             <div className="flex items-center gap-3">
               <Button
-                variant="secondary"
+                asChild
+                variant="primary"
                 size="compact"
-                className="hidden uppercase tracking-[0.18em] md:inline-flex"
+                className="hidden border-cyan-200/25 bg-cyan-100 text-black shadow-[0_0_32px_rgba(103,232,249,0.20)] transition hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_0_42px_rgba(103,232,249,0.34)] md:inline-flex md:text-[0.67rem] md:uppercase md:tracking-[0.18em]"
+                endIcon={<ArrowRight size={14} />}
               >
-                Enter Nexus
+                <Link href="/events">Book Tickets</Link>
               </Button>
 
               <button
+                type="button"
                 onClick={() => setIsMenuOpen((prev) => !prev)}
                 aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isMenuOpen}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-lime-300/34 bg-lime-300/[0.08] text-lime-50 transition hover:bg-lime-300/[0.14] md:hidden"
+                aria-controls="mobile-navigation"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-cyan-200/25 bg-cyan-200/[0.08] text-cyan-50 shadow-[0_0_24px_rgba(34,211,238,0.10)] transition duration-300 hover:bg-cyan-200/[0.14] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-100/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black md:hidden"
               >
                 {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
@@ -139,52 +96,21 @@ export default function Navbar() {
           </div>
 
           {isMenuOpen && (
-            <div className="border-t border-lime-300/22 py-4 md:hidden">
+            <div id="mobile-navigation" className="border-t border-cyan-200/14 py-4 md:hidden">
               <nav className="flex flex-col gap-1">
                 <Link
                   href="/"
                   onClick={closeMenu}
-                  className="rounded-xl px-3 py-3 text-sm uppercase tracking-[0.18em] text-lime-100/68 transition hover:bg-lime-300/[0.12] hover:text-lime-50"
+                  className="rounded-xl px-3 py-3 text-sm uppercase tracking-[0.18em] text-cyan-50/68 transition hover:bg-cyan-200/[0.10] hover:text-cyan-50"
                 >
                   Home
                 </Link>
-                <Link
-                  href="/events"
-                  onClick={closeMenu}
-                  className="rounded-xl px-3 py-3 text-sm uppercase tracking-[0.18em] text-lime-100/68 transition hover:bg-lime-300/[0.12] hover:text-lime-50"
-                >
-                  Events
-                </Link>
-
-                <div className="mt-1 rounded-xl border border-lime-300/16 bg-lime-300/[0.04] p-2">
-                  <p className="px-2 py-2 text-[0.62rem] uppercase tracking-[0.28em] text-lime-100/60">
-                    Event Pages
-                  </p>
-                  <div className="flex flex-col gap-1">
-                    {events.map((event) => (
-                      <Link
-                        key={event.slug}
-                        href={`/events/${event.slug}`}
-                        onClick={closeMenu}
-                        className="rounded-lg px-2 py-2 transition hover:bg-lime-300/[0.12]"
-                      >
-                        <p className="text-[0.7rem] uppercase tracking-[0.22em] text-lime-50">
-                          {event.title}
-                        </p>
-                        <p className="mt-1 text-[0.68rem] text-lime-100/62">
-                          {event.world}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
                 {links.map((link) => (
                   <Link
                     key={link.label}
                     href={link.href}
                     onClick={closeMenu}
-                    className="rounded-xl px-3 py-3 text-sm uppercase tracking-[0.18em] text-lime-100/68 transition hover:bg-lime-300/[0.12] hover:text-lime-50"
+                    className="rounded-xl px-3 py-3 text-sm uppercase tracking-[0.18em] text-cyan-50/68 transition hover:bg-cyan-200/[0.10] hover:text-cyan-50"
                   >
                     {link.label}
                   </Link>
@@ -192,10 +118,12 @@ export default function Navbar() {
               </nav>
 
               <Button
+                asChild
                 variant="primary"
-                className="mt-4 w-full text-xs font-semibold uppercase tracking-[0.18em]"
+                className="mt-4 w-full bg-cyan-100 text-xs font-semibold uppercase tracking-[0.18em] text-black shadow-[0_0_30px_rgba(103,232,249,0.22)] hover:bg-white"
+                endIcon={<ArrowRight size={15} />}
               >
-                Enter Nexus
+                <Link href="/events" onClick={closeMenu}>Book Tickets</Link>
               </Button>
             </div>
           )}

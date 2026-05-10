@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const nexusButtonVariants = cva(
   [
     "group inline-flex items-center justify-center gap-2 rounded-full",
-    "text-sm font-medium tracking-[0.08em] uppercase",
+    "text-sm font-medium tracking-[0.06em] uppercase",
     "transition-[background-color,border-color,color,transform,box-shadow]",
     "duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
     "outline-none",
@@ -19,8 +19,8 @@ const nexusButtonVariants = cva(
     variants: {
       variant: {
         primary: [
-          "border border-lime-300/55 bg-lime-300 text-[#061006]",
-          "shadow-[0_1px_0_rgba(211,255,183,0.55)_inset,0_0_20px_rgba(145,255,98,0.2)]",
+          "border border-lime-300/55 bg-lime-300 text-[#03111f]",
+          "shadow-[0_1px_0_rgba(224,247,255,0.5)_inset,0_0_24px_rgba(56,189,248,0.24)]",
           "hover:-translate-y-[1px] hover:bg-lime-200",
         ],
         secondary: [
@@ -34,9 +34,9 @@ const nexusButtonVariants = cva(
         ],
       },
       size: {
-        default: "h-11 px-6 text-[0.75rem]",
-        compact: "h-10 px-5 text-[0.72rem]",
-        roomy: "h-12 px-8 text-[0.76rem]",
+        default: "h-11 px-6 text-[0.73rem]",
+        compact: "h-10 px-5 text-[0.69rem]",
+        roomy: "h-12 px-7 sm:px-8 text-[0.74rem]",
       },
     },
     defaultVariants: {
@@ -64,17 +64,42 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const Comp = asChild ? Slot.Root : "button";
-
-  return (
-    <Comp className={cn(nexusButtonVariants({ variant, size, className }))} {...props}>
-      {startIcon ? <span className="shrink-0">{startIcon}</span> : null}
-      <span>{children}</span>
+  const buttonClassName = cn(nexusButtonVariants({ variant, size, className }));
+  const content = (
+    <>
+      {startIcon ? <span className="flex shrink-0 items-center justify-center leading-none">{startIcon}</span> : null}
+      <span className="flex items-center leading-none">{children}</span>
       {endIcon ? (
-        <span className="shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5">
+        <span className="flex shrink-0 items-center justify-center leading-none transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5">
           {endIcon}
         </span>
       ) : null}
+    </>
+  );
+
+  if (asChild && React.isValidElement<{ className?: string; children?: React.ReactNode }>(children)) {
+    return React.cloneElement(children, {
+      className: cn(buttonClassName, children.props.className),
+      ...props,
+      children: (
+        <>
+          {startIcon ? <span className="flex shrink-0 items-center justify-center leading-none">{startIcon}</span> : null}
+          <span className="flex items-center leading-none">{children.props.children}</span>
+          {endIcon ? (
+            <span className="flex shrink-0 items-center justify-center leading-none transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5">
+              {endIcon}
+            </span>
+          ) : null}
+        </>
+      ),
+    });
+  }
+
+  const Comp = asChild ? Slot.Root : "button";
+
+  return (
+    <Comp className={buttonClassName} {...props}>
+      {content}
     </Comp>
   );
 }

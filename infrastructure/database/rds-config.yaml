@@ -1,0 +1,195 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'The Nexus - Production PostgreSQL RDS Configuration'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+  
+  DBInstanceClass:
+    Type: String
+    Default: db.t4g.medium
+    AllowedValues: [db.t4g.medium, db.t4g.large, db.r6g.large, db.r6g.xlarge]
+    Description: 'Database instance class'
+  
+  AllocatedStorage:
+    Type: Number
+    Default: 100
+    MinValue: 20
+    MaxValue: 1000
+    Description: 'Allocated storage in GB'
+
+Resources:
+  # Database subnet group
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: 'Subnet group for RDS database'
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-thenexus-db-subnet-group'
+
+  # Security group for RDS
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'Security group for RDS database'
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BackendSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-thenexus-db-sg'
+
+  # RDS instance
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub '${Environment}-thenexus-db'
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: postgres
+      EngineVersion: '15.4'
+      AllocatedStorage: !Ref AllocatedStorage
+      StorageType: gp3
+      StorageEncrypted: true
+      BackupRetentionPeriod: 30
+      MultiAZ: true
+      PubliclyAccessible: false
+      StorageAutoScaling:
+        MaxCapacityStorage: 1000
+        AutoPause: false
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+      DeletionPolicy: Snapshot
+      DeleteAutomatedBackups: false
+      EnableCloudwatchLogsExports:
+        - postgresql
+      MonitoringInterval: 60
+      EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 7
+      CopyTagsToSnapshot: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-thenexus-db'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # CloudWatch alarm for CPU utilization
+  CPUUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-thenexus-db-cpu'
+      AlarmDescription: 'Database CPU utilization'
+      MetricName: CPUUtilization
+      Namespace: AWS/RDS
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: DBInstanceIdentifier
+          Value: !Ref DatabaseInstance
+      AlarmActions:
+        - !Ref SNSTopicArn
+
+  # CloudWatch alarm for memory
+  MemoryUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-thenexus-db-memory'
+      AlarmDescription: 'Database memory utilization'
+      MetricName: FreeableMemory
+      Namespace: AWS/RDS
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 1000000000  # 1GB in bytes
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: DBInstanceIdentifier
+          Value: !Ref DatabaseInstance
+      AlarmActions:
+        - !Ref SNSTopicArn
+
+  # CloudWatch alarm for storage
+  StorageUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-thenexus-db-storage'
+      AlarmDescription: 'Database storage utilization'
+      MetricName: FreeStorageSpace
+      Namespace: AWS/RDS
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 10737418240  # 10GB in bytes
+      ComparisonOperator: LessThanThreshold
+      Dimensions:
+        - Name: DBInstanceIdentifier
+          Value: !Ref DatabaseInstance
+      AlarmActions:
+        - !Ref SNSTopicArn
+
+  # SNS topic for alerts
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${Environment}-thenexus-db-alerts'
+      DisplayName: 'Database Alerts'
+
+  # Parameter store for database connection
+  DatabaseConnectionParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${Environment}/thenexus/database/connection'
+      Type: String
+      Value: !Sub 'postgresql://${DatabaseInstance.Endpoint.Address}:${DatabaseInstance.Endpoint.Port}/thenexus'
+      Description: 'Database connection string'
+      Secure: true
+
+  # Parameter store for database credentials
+  DatabaseUsernameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${Environment}/thenexus/database/username'
+      Type: String
+      Value: !Ref DatabaseUsername
+      Description: 'Database username'
+      Secure: true
+
+  DatabasePasswordParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/${Environment}/thenexus/database/password'
+      Type: SecureString
+      Value: !Ref DatabasePassword
+      Description: 'Database password'
+      Secure: true
+
+Outputs:
+  DatabaseEndpoint:
+    Description: 'Database endpoint'
+    Value: !GetAtt DatabaseInstance.Endpoint.Address
+    Export:
+      Name: !Sub '${Environment}-DatabaseEndpoint'
+
+  DatabasePort:
+    Description: 'Database port'
+    Value: !GetAtt DatabaseInstance.Endpoint.Port
+    Export:
+      Name: !Sub '${Environment}-DatabasePort'
+
+  DatabaseName:
+    Description: 'Database name'
+    Value: !Ref DatabaseName
+    Export:
+      Name: !Sub '${Environment}-DatabaseName'

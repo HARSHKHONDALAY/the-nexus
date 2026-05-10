@@ -1,9 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import FooterEcosystem from "@/components/layout/footer-ecosystem";
 import Navbar from "@/components/layout/navbar";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import { Button } from "@/components/shared/button";
+import { noIndexMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = noIndexMetadata("Page Not Found | The Nexus");
 
 export default function NotFound() {
   return (
@@ -20,9 +24,9 @@ export default function NotFound() {
               The link may be outdated, private, or moved into another world.
             </p>
             <div className="mt-10">
-              <Link href="/">
-                <Button variant="primary" size="roomy">Return Home</Button>
-              </Link>
+              <Button asChild variant="primary" size="roomy">
+                <Link href="/">Return Home</Link>
+              </Button>
             </div>
           </div>
         </SectionWrapper>
@@ -31,4 +35,3 @@ export default function NotFound() {
     </>
   );
 }
-

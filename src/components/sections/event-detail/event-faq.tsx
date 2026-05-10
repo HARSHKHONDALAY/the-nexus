@@ -9,7 +9,7 @@ export default function EventFaq({ event }: EventFaqProps) {
   return (
     <SectionWrapper spacing="default" className="border-y border-white/10 bg-black/40" blendTop blendBottom>
       <div className="mb-12 md:mb-14">
-        <p className="text-xs uppercase tracking-[0.34em] text-white/45">FAQ</p>
+        <p className="text-xs uppercase tracking-[0.34em] text-white/60">FAQ</p>
       </div>
 
       <div className="space-y-4">

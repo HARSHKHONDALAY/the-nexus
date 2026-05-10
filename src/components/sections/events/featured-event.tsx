@@ -23,7 +23,7 @@ export default function FeaturedEvent({ event }: FeaturedEventProps) {
         viewport={{ once: true, amount: 0.32 }}
         className="relative overflow-hidden rounded-[2rem] border border-lime-200/18 bg-lime-200/[0.04] p-8 md:p-12"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_18%,rgba(145,255,98,0.22),transparent_42%),radial-gradient(circle_at_8%_80%,rgba(173,216,255,0.12),transparent_36%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_18%,rgba(56,189,248,0.22),transparent_42%),radial-gradient(circle_at_8%_80%,rgba(173,216,255,0.12),transparent_36%)]" />
         <div className="relative z-10 grid gap-8 md:grid-cols-12 md:items-end">
           <div className="md:col-span-8">
             <p className="text-xs uppercase tracking-[0.36em] text-lime-100/52">
@@ -47,11 +47,11 @@ export default function FeaturedEvent({ event }: FeaturedEventProps) {
             </p>
 
             <Magnetic className="mt-7 inline-block" strength={0.14}>
-              <Link href={`/events/${event.slug}`}>
-                <Button variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
+              <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
+                <Link href={`/register/${event.eventKey}`}>
                   Reserve This Experience
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </Magnetic>
           </div>
         </div>

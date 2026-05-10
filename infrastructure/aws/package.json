@@ -1,0 +1,21 @@
+{
+  "name": "thenexus-infrastructure",
+  "version": "1.0.0",
+  "description": "AWS Infrastructure for The Nexus",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "aws cloudformation deploy --template-file s3-buckets.yaml --stack-name thenexus-media-infrastructure --parameter-overrides Environment=production",
+    "package-lambda": "zip -r media-processor.zip media-processor-lambda.ts package.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1691.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3"
+  }
+}

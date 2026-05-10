@@ -61,7 +61,7 @@ export default function GlobalAtmosphere() {
       />
       <div className="absolute -left-28 top-24 h-[420px] w-[420px] rounded-full bg-emerald-300/[0.07] blur-[140px]" />
       <div className="absolute bottom-[-240px] right-[-100px] h-[460px] w-[460px] rounded-full bg-green-300/[0.08] blur-[150px]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/55 via-transparent to-[#050806]/80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#020817]/55 via-transparent to-[#020817]/80" />
     </div>
   );
 }

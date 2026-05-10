@@ -36,19 +36,19 @@ export default function RegistrationSection({ event }: RegistrationSectionProps)
     >
       <div className="grid gap-10 md:grid-cols-12 md:gap-12">
         <div className="md:col-span-5">
-          <p className="text-xs uppercase tracking-[0.34em] text-lime-100/48">
+          <p className="text-xs uppercase tracking-[0.34em] text-lime-100/70">
             Registration
           </p>
-          <h3 className="mt-6 text-3xl font-semibold leading-tight tracking-tight text-lime-50 md:text-4xl">
+          <h2 className="mt-6 text-3xl font-semibold leading-tight tracking-tight text-lime-50 md:text-4xl">
             Reserve your place in this culture room.
-          </h3>
+          </h2>
           <p className="mt-6 max-w-[46ch] text-lime-100/62">
             Access is curated. Choose a tier, then request entry through the house.
             This is designed to feel exclusive, calm, and intentional—not transactional.
           </p>
 
           <div className="mt-8 rounded-3xl border border-lime-200/16 bg-lime-200/[0.03] p-6">
-            <p className="text-xs uppercase tracking-[0.28em] text-lime-100/52">
+            <p className="text-xs uppercase tracking-[0.28em] text-lime-100/70">
               Limited spots
             </p>
             <p className="mt-3 text-4xl font-semibold tracking-tight text-lime-50">
@@ -80,7 +80,7 @@ export default function RegistrationSection({ event }: RegistrationSectionProps)
             className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-lime-200/16 bg-black/45 p-6"
           >
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-lime-100/50">
+              <p className="text-xs uppercase tracking-[0.24em] text-lime-100/70">
                 Selected tier
               </p>
               <p className="mt-2 text-lg font-medium text-lime-50">
@@ -92,11 +92,9 @@ export default function RegistrationSection({ event }: RegistrationSectionProps)
             </div>
 
             <Magnetic className="inline-block" strength={0.14}>
-              <Link href={`/register/${event.eventKey}`}>
-                <Button variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
-                  Request Entry
-                </Button>
-              </Link>
+              <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
+                <Link href={`/register/${event.eventKey}`}>Reserve Your Spot</Link>
+              </Button>
             </Magnetic>
           </motion.div>
         </div>
@@ -104,4 +102,3 @@ export default function RegistrationSection({ event }: RegistrationSectionProps)
     </SectionWrapper>
   );
 }
-

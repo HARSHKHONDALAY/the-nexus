@@ -19,12 +19,25 @@ export default function GlassCard({
         backdrop-blur-xl
         transition-all
         duration-500
-        hover:border-white/20
-        hover:bg-white/[0.05]
-        ${className}
-      `}
-    >
-      {children}
-    </div>
+         hover:border-white/20
+         hover:bg-white/[0.05]
+         shadow-[0_0_40px_rgba(255,255,255,0.04)]
+         hover:shadow-[0_0_60px_rgba(255,255,255,0.08)]
+         transform
+         hover:-translate-y-1
+         motion-safe:transition-transform
+         motion-safe:duration-500
+         motion-safe:ease-out
+         focus-within:ring-2
+         focus-within:ring-cyan-300/40
+         focus-within:ring-offset-2
+         focus-within:ring-offset-black
+         ${className}
+       `}
+       tabIndex={0}
+       role="group"
+     >
+       {children}
+     </div>
   );
 }

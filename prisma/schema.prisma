@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  LIVE
+  CLOSED
+  PAST
+  ARCHIVED
+}
+
+enum RegistrationStatus {
+  SUBMITTED
+  CONFIRMED
+  CANCELLED
+  WAITLISTED
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REFUNDED
+}
+
+enum CheckInStatus {
+  NOT_CHECKED_IN
+  CHECKED_IN
+  LATE
+  NO_SHOW
+}
+
+enum RegistrationSource {
+  WEBSITE
+  MANUAL
+  INSTAGRAM
+  PARTNER
+  BOOK_MY_SHOW
+  WALK_IN
+  IMPORTED
+}
+
+enum ChessLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  PROFESSIONAL
+  SPECTATOR
+  UNKNOWN
+}
+
+enum FinanceAdjustmentSection {
+  REVENUE
+  VENUE_COST
+  EXPENSE
+  REFUND
+  OPERATIONS
+  DISCOUNT
+}
+
+enum FinanceAdjustmentOperator {
+  ADD
+  SUBTRACT
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum MediaStatus {
+  DRAFT
+  CURATING
+  PUBLISHED
+  ARCHIVED
+}
+
+model Event {
+  id                 String              @id @default(cuid())
+  eventKey           String              @unique @map("event_key")
+  title              String
+  eventDate          DateTime            @map("event_date") @db.Date
+  dateLabel          String              @map("date_label")
+  timeLabel          String              @map("time_label")
+  venue              String
+  locationShort      String              @map("location_short")
+  price              Decimal             @default(600.00) @db.Decimal(12, 2)
+  venueCost          Decimal             @default(0.00) @map("venue_cost") @db.Decimal(12, 2)
+  maxSeats           Int                 @default(30) @map("max_seats")
+  upiId              String              @default("") @map("upi_id")
+  whatsappLink       String?             @map("whatsapp_link")
+  qrImage            String?             @map("qr_image")
+  logo               String?
+  status             EventStatus         @default(DRAFT)
+  registrationClosed Boolean             @default(false) @map("registration_closed")
+  archivedToPast     Boolean             @default(false) @map("archived_to_past")
+  isDeleted          Boolean             @default(false) @map("is_deleted")
+  deletedAt          DateTime?           @map("deleted_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  registrations      Registration[]
+  financeAdjustments FinanceAdjustment[]
+  auditLogs          AuditLog[]
+  moments            MomentAsset[]
+
+  @@index([eventDate])
+  @@index([status])
+  @@index([registrationClosed])
+  @@index([archivedToPast])
+  @@index([isDeleted])
+  @@map("events")
+}
+
+model Registration {
+  id                   String             @id @default(cuid())
+  eventId              String             @map("event_id")
+  event                Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  fullName             String             @map("full_name")
+  contactNumber        String             @map("contact_number")
+  email                String             @default("")
+  instagramId          String             @default("") @map("instagram_id")
+  age                  Int?
+  locationArea         String             @default("") @map("location_area")
+  occupation           String             @default("")
+  workingSector        String             @default("") @map("working_sector")
+  whatsappOptIn        Boolean            @default(false) @map("whatsapp_opt_in")
+  chessLevel           ChessLevel         @default(UNKNOWN) @map("chess_level")
+  dietaryPreference    String             @default("") @map("dietary_preference")
+  paymentScreenshotUrl String?            @map("payment_screenshot_url")
+  agreementAccepted    Boolean            @default(false) @map("agreement_accepted")
+  submittedAt          DateTime           @default(now()) @map("submitted_at")
+  checkInStatus        CheckInStatus      @default(NOT_CHECKED_IN) @map("check_in_status")
+  checkedInAt          DateTime?          @map("checked_in_at")
+  sourceType           RegistrationSource @default(WEBSITE) @map("source_type")
+  paymentStatus        PaymentStatus      @default(PENDING) @map("payment_status")
+  registrationStatus   RegistrationStatus @default(SUBMITTED) @map("registration_status")
+  attendeeNote         String?            @map("attendee_note")
+  eventTitleSnapshot   String             @default("") @map("event_title_snapshot")
+  eventDateSnapshot    DateTime?          @map("event_date_snapshot") @db.Date
+  eventTimeSnapshot    String             @default("") @map("event_time_snapshot")
+  eventVenueSnapshot   String             @default("") @map("event_venue_snapshot")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  @@index([eventId])
+  @@index([contactNumber])
+  @@index([submittedAt])
+  @@index([checkInStatus])
+  @@index([sourceType])
+  @@index([paymentStatus])
+  @@index([registrationStatus])
+  @@unique([eventId, contactNumber])
+  @@map("registrations")
+}
+
+model FinanceAdjustment {
+  id                String                    @id @default(cuid())
+  eventId           String                    @map("event_id")
+  event             Event                     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  section           FinanceAdjustmentSection  @default(EXPENSE)
+  operator          FinanceAdjustmentOperator @default(ADD)
+  amount            Decimal                   @default(0.00) @db.Decimal(12, 2)
+  comment           String?
+  createdBy         String?                   @map("created_by")
+  createdAt         DateTime                  @default(now()) @map("created_at")
+  updatedAt         DateTime                  @updatedAt @map("updated_at")
+
+  @@index([eventId])
+  @@index([section])
+  @@index([createdAt])
+  @@map("finance_adjustments")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  eventId     String?  @map("event_id")
+  event       Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  userId      String?  @map("user_id")
+  actionKey   String   @map("action_key")
+  actionLabel String   @map("action_label")
+  details     String?
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([eventId])
+  @@index([actionKey])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model MomentAsset {
+  id          String      @id @default(cuid())
+  eventId     String      @map("event_id")
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title       String
+  type        MediaType
+  url         String
+  status      MediaStatus @default(DRAFT)
+  capturedAt  DateTime?   @map("captured_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@index([eventId])
+  @@index([status])
+  @@index([capturedAt])
+  @@map("moment_assets")
+}

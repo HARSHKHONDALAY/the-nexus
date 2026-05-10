@@ -30,7 +30,7 @@ export default function TierCard({ tier, selected, onSelect }: TierCardProps) {
     >
       <div className="flex items-start justify-between gap-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-lime-100/52">
+          <p className="text-xs uppercase tracking-[0.3em] text-lime-100/70">
             {tier.name}
           </p>
           <p className="mt-4 text-3xl font-semibold tracking-tight text-lime-50">
@@ -67,4 +67,3 @@ export default function TierCard({ tier, selected, onSelect }: TierCardProps) {
     </motion.button>
   );
 }
-

@@ -15,18 +15,20 @@ export default function PhilosophyBelonging() {
         className="mx-auto max-w-5xl text-center"
       >
         <p className="text-xs uppercase tracking-[0.38em] text-white/45 md:text-sm">
-          Philosophy
+          The Parent Ecosystem
         </p>
         <h2 className="mt-7 text-[2.3rem] font-semibold leading-[1.02] tracking-[-0.03em] text-white sm:text-[3.2rem] md:text-[4.5rem]">
-          Belonging is not an afterthought.
+          The Nexus is the house.
           <span className="mt-2 block text-white/75">
-            It is the architecture.
+            Chess and art are the first rooms.
           </span>
         </h2>
         <p className="mx-auto mt-8 max-w-3xl text-base leading-relaxed text-white/62 sm:text-lg md:text-xl">
-          The Nexus is designed as a cultural headquarters where identity,
-          creativity, and community align. Every room, conversation, and
-          experience is curated to make people feel seen, connected, and at home.
+          The Chess Nexus carries sharp minds, cafe-table rivalry, and the joy
+          of meeting someone across a board. The Art Nexus carries softer
+          expression, shared materials, and emotional ease. Together, they form a
+          larger belonging system that can grow into music, film, design, and
+          founder rooms without losing its human centre.
         </p>
       </motion.div>
     </SectionWrapper>

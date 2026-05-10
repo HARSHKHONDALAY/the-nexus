@@ -1,8 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+
+import { Button } from "@/components/shared/button";
+import { events } from "@/lib/events";
 
 export default function EventsHero() {
+  const featuredEvent = events.find((event) => event.featured) ?? events[0];
+
   return (
     <section className="relative isolate min-h-[72vh] overflow-hidden bg-black">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_22%,rgba(146,255,103,0.16),transparent_36%),radial-gradient(circle_at_78%_22%,rgba(173,216,255,0.1),transparent_32%)]" />
@@ -25,6 +32,14 @@ export default function EventsHero() {
             Explore the evolving event language of The Nexus across chess and art
             worlds, from intimate room sessions to larger social rituals.
           </p>
+          <div className="mt-9 flex flex-wrap items-center gap-3">
+            <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
+              <Link href={`/register/${featuredEvent.eventKey}`}>Book Featured Tickets</Link>
+            </Button>
+            <Button asChild variant="secondary" size="roomy">
+              <Link href={`/events/${featuredEvent.slug}`}>{featuredEvent.remainingSpots} spots left</Link>
+            </Button>
+          </div>
         </motion.div>
       </div>
     </section>

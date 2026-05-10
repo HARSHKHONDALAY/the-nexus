@@ -83,6 +83,12 @@ export default function EventsDiscover({ events }: EventsDiscoverProps) {
           </motion.div>
         ))}
       </motion.div>
+
+      {filteredEvents.length === 0 ? (
+        <div className="mt-6 rounded-[1.5rem] border border-lime-200/16 bg-lime-200/[0.04] p-6 text-sm leading-7 text-lime-100/62">
+          No experiences match these filters yet. Reset the filters or check the next release wave.
+        </div>
+      ) : null}
     </SectionWrapper>
   );
 }

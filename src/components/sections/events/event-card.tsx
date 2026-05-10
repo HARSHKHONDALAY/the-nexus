@@ -1,9 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
+import { Button } from "@/components/shared/button";
+import { getEventCardImage } from "@/lib/event-media";
 import type { EventData } from "@/lib/events";
 
 interface EventCardProps {
@@ -11,18 +14,28 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event }: EventCardProps) {
+  const thumbnail = getEventCardImage(event);
+
   return (
     <motion.article
       whileHover={{ y: -4 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative overflow-hidden rounded-[1.7rem] border border-lime-200/18 bg-lime-200/[0.04]"
+      className="group relative overflow-hidden rounded-[1.7rem] border border-lime-200/18 bg-lime-200/[0.04] shadow-[0_20px_70px_rgba(0,0,0,0.18)]"
     >
-      <div className="relative h-52 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_20%,rgba(145,255,98,0.24),transparent_40%),radial-gradient(circle_at_20%_82%,rgba(170,222,255,0.15),transparent_45%)] transition-transform duration-1000 group-hover:scale-[1.05]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/85" />
+      <div className="relative h-52 overflow-hidden rounded-t-[1.7rem] bg-black">
+        <Image
+          src={thumbnail.src}
+          alt={thumbnail.alt}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover object-center transition duration-1000 ease-out group-hover:scale-[1.03] group-hover:opacity-95"
+          placeholder="blur"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/80" />
       </div>
       <div className="p-6 md:p-7">
-        <div className="flex flex-wrap items-center gap-2 text-[0.62rem] uppercase tracking-[0.22em] text-lime-100/52">
+        <div className="flex flex-wrap items-center gap-2 text-[0.62rem] uppercase tracking-[0.18em] text-lime-100/52">
           <span className="rounded-full border border-lime-300/24 px-3 py-1">
             {event.world}
           </span>
@@ -32,22 +45,30 @@ export default function EventCard({ event }: EventCardProps) {
           <span>{event.date}</span>
         </div>
 
-        <h3 className="mt-4 text-2xl font-semibold leading-tight tracking-tight text-lime-50">
+        <h3 className="mt-4 text-[1.65rem] font-semibold leading-[1.07] tracking-[-0.03em] text-lime-50">
           {event.title}
         </h3>
-        <p className="mt-3 text-sm leading-relaxed text-lime-100/62 md:text-base">
+        <p className="mt-3 text-[0.98rem] leading-7 text-lime-100/62">
           {event.tagline}
         </p>
-        <p className="mt-4 text-xs uppercase tracking-[0.22em] text-lime-100/45">
+        <p className="mt-4 text-[0.68rem] uppercase tracking-[0.18em] text-lime-100/45">
           From {event.priceFrom} · {event.remainingSpots} spots remaining
         </p>
 
-        <Link
-          href={`/events/${event.slug}`}
-          className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-lime-100/78 transition-colors hover:text-lime-50"
-        >
-          View Event <ArrowUpRight size={14} />
-        </Link>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Button asChild variant="primary" size="compact" endIcon={<ArrowRight size={14} />}>
+            <Link href={`/register/${event.eventKey}`}>Book Tickets</Link>
+          </Button>
+          <Button
+            asChild
+            variant="ghost"
+            size="compact"
+            className="border border-lime-300/16 px-4 text-[0.67rem] tracking-[0.16em] text-lime-100/78 hover:border-lime-300/34 hover:bg-lime-300/[0.08] hover:text-lime-50"
+            endIcon={<ArrowUpRight size={14} />}
+          >
+            <Link href={`/events/${event.slug}`}>View Details</Link>
+          </Button>
+        </div>
       </div>
     </motion.article>
   );
