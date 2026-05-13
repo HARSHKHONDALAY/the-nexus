@@ -16,10 +16,6 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
 
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   // Production optimization
   experimental: {
     optimizePackageImports: [
