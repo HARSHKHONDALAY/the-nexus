@@ -204,7 +204,7 @@ export default function RegisterForm({ event }: RegisterFormProps) {
       <div className="grid gap-10 md:grid-cols-12 md:gap-12">
         <div className="md:col-span-6">
           <div className="grid gap-4">
-            {event.ticketTiers.map((tier) => (
+            {event.ticketTiers.map((tier: any) => (
               <TierCard key={tier.id} tier={tier} selected={tier.id === tierId} onSelect={() => setTierId(tier.id)} />
             ))}
           </div>
