@@ -80,10 +80,10 @@ export default function TierCard({
       </div>
 
       <ul className="mt-6 space-y-3">
-        {tier.perks.map(
-          (perk: any) => (
+        {(tier.perks || []).map(
+          (perk: any, index: number) => (
             <li
-              key={perk}
+              key={`${perk}-${index}`}
               className="flex items-start gap-3 text-sm text-lime-100/70"
             >
               <Check
@@ -91,7 +91,7 @@ export default function TierCard({
                 className="mt-0.5 text-lime-200/70"
               />
 
-              <span>{perk}</span>
+              <span>{String(perk)}</span>
             </li>
           )
         )}
