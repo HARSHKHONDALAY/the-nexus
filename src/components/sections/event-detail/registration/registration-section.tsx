@@ -8,22 +8,35 @@ import { motion } from "framer-motion";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import Magnetic from "@/components/interactions/magnetic";
 import { Button } from "@/components/shared/button";
-type EventData = any;
 import TierCard from "@/components/sections/event-detail/registration/tier-card";
+
+type EventData = any;
 
 interface RegistrationSectionProps {
   event: EventData;
 }
 
-export default function RegistrationSection({ event }: RegistrationSectionProps) {
-  const availableTiers = event.ticketTiers.filter((t) => t.status !== "sold_out");
-  const [selectedTierId, setSelectedTierId] = useState<string>(
-    availableTiers[0]?.id ?? event.ticketTiers[0]?.id ?? "",
-  );
+export default function RegistrationSection({
+  event,
+}: RegistrationSectionProps) {
+  const availableTiers =
+    event.ticketTiers.filter(
+      (t: any) => t.status !== "sold_out"
+    );
+
+  const [selectedTierId, setSelectedTierId] =
+    useState<string>(
+      availableTiers[0]?.id ??
+        event.ticketTiers[0]?.id ??
+        ""
+    );
 
   const selectedTier = useMemo(
-    () => event.ticketTiers.find((t) => t.id === selectedTierId),
-    [event.ticketTiers, selectedTierId],
+    () =>
+      event.ticketTiers.find(
+        (t: any) => t.id === selectedTierId
+      ),
+    [event.ticketTiers, selectedTierId]
   );
 
   return (
@@ -39,9 +52,11 @@ export default function RegistrationSection({ event }: RegistrationSectionProps)
           <p className="text-xs uppercase tracking-[0.34em] text-lime-100/70">
             Registration
           </p>
+
           <h2 className="mt-6 text-3xl font-semibold leading-tight tracking-tight text-lime-50 md:text-4xl">
             Reserve your place in this culture room.
           </h2>
+
           <p className="mt-6 max-w-[46ch] text-lime-100/62">
             Access is curated. Choose a tier, then request entry through the house.
             This is designed to feel exclusive, calm, and intentional—not transactional.
@@ -51,9 +66,11 @@ export default function RegistrationSection({ event }: RegistrationSectionProps)
             <p className="text-xs uppercase tracking-[0.28em] text-lime-100/70">
               Limited spots
             </p>
+
             <p className="mt-3 text-4xl font-semibold tracking-tight text-lime-50">
               {event.remainingSpots}
             </p>
+
             <p className="mt-2 text-sm text-lime-100/62">
               Remaining from {event.capacity}
             </p>
@@ -62,38 +79,64 @@ export default function RegistrationSection({ event }: RegistrationSectionProps)
 
         <div className="md:col-span-7">
           <div className="grid gap-4">
-            {event.ticketTiers.map((tier) => (
-              <TierCard
-                key={tier.id}
-                tier={tier}
-                selected={tier.id === selectedTierId}
-                onSelect={() => setSelectedTierId(tier.id)}
-              />
-            ))}
+            {event.ticketTiers.map(
+              (tier: any) => (
+                <TierCard
+                  key={tier.id}
+                  tier={tier}
+                  selected={
+                    tier.id === selectedTierId
+                  }
+                  onSelect={() =>
+                    setSelectedTierId(tier.id)
+                  }
+                />
+              )
+            )}
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true, amount: 0.4 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            viewport={{
+              once: true,
+              amount: 0.4,
+            }}
             className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-lime-200/16 bg-black/45 p-6"
           >
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-lime-100/70">
                 Selected tier
               </p>
+
               <p className="mt-2 text-lg font-medium text-lime-50">
                 {selectedTier?.name ?? "—"}
               </p>
+
               <p className="mt-1 text-sm text-lime-100/62">
                 {selectedTier?.price ?? ""}
               </p>
             </div>
 
-            <Magnetic className="inline-block" strength={0.14}>
-              <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
-                <Link href={`/register/${event.eventKey}`}>Reserve Your Spot</Link>
+            <Magnetic
+              className="inline-block"
+              strength={0.14}
+            >
+              <Button
+                asChild
+                variant="primary"
+                size="roomy"
+                endIcon={<ArrowRight size={16} />}
+              >
+                <Link
+                  href={`/register/${event.eventKey}`}
+                >
+                  Reserve Your Spot
+                </Link>
               </Button>
             </Magnetic>
           </motion.div>
