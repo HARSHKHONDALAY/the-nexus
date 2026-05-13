@@ -8,8 +8,8 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  NODE_VERSION: '22.13.0'
-  JAVA_VERSION: '21'
+  NODE_VERSION: "22.13.0"
+  JAVA_VERSION: "21"
 
 jobs:
   frontend-tests:
@@ -29,15 +29,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+
       - name: Skip ESLint
         run: echo "ESLint temporarily disabled"
 
-      - name:  Skip Type Check
+      - name: Skip Type Check
         run: echo "TypeScript check temporarily disabled"
 
       - name: Build frontend
@@ -67,14 +70,15 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
+          distribution: "temurin"
 
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          restore-keys: |
+            ${{ runner.os }}-m2
 
       - name: Make Maven wrapper executable
         working-directory: ./backend
@@ -99,6 +103,7 @@ jobs:
     if: false
     name: Security Scan
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -112,7 +117,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -159,10 +164,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
 
       - name: Run database migrations
         run: pnpm db:migrate
