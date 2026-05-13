@@ -17,7 +17,7 @@ export default function EventCommunityVibe({ event }: EventCommunityVibeProps) {
         </div>
         <div className="md:col-span-7">
           <ul className="space-y-4">
-            {event.vibePoints.map((point) => (
+            {event.vibePoints.map((point: any) => (
               <li
                 key={point}
                 className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-5 text-white/75"
