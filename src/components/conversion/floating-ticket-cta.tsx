@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Ticket } from "lucide-react";
 import { motion } from "framer-motion";
 
-import type { EventData } from "@/lib/events";
+type EventData = any;
 
 interface FloatingTicketCtaProps {
   event: EventData | null | undefined;
