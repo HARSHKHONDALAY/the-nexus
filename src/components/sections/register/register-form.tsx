@@ -96,7 +96,7 @@ export default function RegisterForm({ event }: RegisterFormProps) {
   });
 
   const selectedTier = useMemo(
-    () => event.ticketTiers.find((tier) => tier.id === tierId),
+    () => event.ticketTiers.find((tier: any) => tier.id === tierId),
     [event.ticketTiers, tierId],
   );
 
