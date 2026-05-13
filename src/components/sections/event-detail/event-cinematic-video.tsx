@@ -50,7 +50,7 @@ export default function EventCinematicVideo({ event }: EventCinematicVideoProps)
           loop
           playsInline
           preload="metadata"
-          poster={fallbackImage.src.src}
+          poster={String((fallbackImage as any).src)}
           aria-label={`${event.title} ${video.label.toLowerCase()} footage`}
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_24%,rgba(103,232,249,0.16),transparent_32%),linear-gradient(90deg,rgba(0,0,0,0.92),rgba(0,0,0,0.48)_58%,rgba(0,0,0,0.74))]" />
