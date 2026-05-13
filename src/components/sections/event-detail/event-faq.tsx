@@ -13,7 +13,7 @@ export default function EventFaq({ event }: EventFaqProps) {
       </div>
 
       <div className="space-y-4">
-        {event.faqs.map((faq) => (
+        {event.faqs.map((faq: any) => (
           <details
             key={faq.question}
             className="group rounded-2xl border border-white/10 bg-black/45 p-6"
