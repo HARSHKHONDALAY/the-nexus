@@ -84,13 +84,59 @@ public class AdminOperationsController {
       CreateAdminEventRequest request = objectMapper.readValue(eventDataJson, CreateAdminEventRequest.class);
       
       // Handle poster image upload if present
+      String posterImageUrl = null;
       if (posterImage != null && !posterImage.isEmpty()) {
-        // TODO: Implement poster image upload logic
-        // For now, just log that we received the image
-        System.out.println("Received poster image: " + posterImage.getOriginalFilename() + " (" + posterImage.getSize() + " bytes)");
+        try {
+          // Generate unique filename
+          String originalFilename = posterImage.getOriginalFilename();
+          String fileExtension = originalFilename != null && originalFilename.contains(".") 
+            ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+            : ".jpg";
+          String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+          
+          // Create uploads directory if it doesn't exist
+          java.io.File uploadDir = new java.io.File("uploads/events");
+          if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+          }
+          
+          // Save file locally
+          java.io.File destinationFile = new java.io.File(uploadDir, uniqueFilename);
+          posterImage.transferTo(destinationFile);
+          
+          // Set the image URL (relative path for now)
+          posterImageUrl = "/uploads/events/" + uniqueFilename;
+          
+          System.out.println("Successfully uploaded poster image: " + uniqueFilename + " (" + posterImage.getSize() + " bytes)");
+        } catch (Exception e) {
+          System.err.println("Failed to upload poster image: " + e.getMessage());
+          // Continue without image - don't fail the whole event creation
+        }
       }
       
-      return ApiResponse.ok(service.createEvent(request, principal.getUser()), "Event created.");
+      // Create new request with poster image URL
+      CreateAdminEventRequest requestWithImage = new CreateAdminEventRequest(
+          request.title(),
+          request.eventType(),
+          request.startsAt(),
+          request.endsAt(),
+          request.venueName(),
+          request.venueAddress(),
+          request.city(),
+          request.ticketPricePaise(),
+          request.venueCostPaise(),
+          request.maxCapacity(),
+          request.description(),
+          request.registrationOpen(),
+          request.publish(),
+          request.allowWalkIns(),
+          request.visibility(),
+          request.seoTitle(),
+          request.seoDescription(),
+          posterImageUrl
+      );
+      
+      return ApiResponse.ok(service.createEvent(requestWithImage, principal.getUser()), "Event created.");
     } catch (Exception e) {
       throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid event data: " + e.getMessage());
     }

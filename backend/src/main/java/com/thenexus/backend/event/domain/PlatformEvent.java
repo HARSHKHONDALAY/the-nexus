@@ -210,7 +210,9 @@ private Instant deletedAt;
   public Instant getEndsAt() { return endsAt; }
   public String getTimezone() { return timezone; }
   public String getBannerUrl() { return bannerUrl; }
+  public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
   public String getHeroMediaUrl() { return heroMediaUrl; }
+  public void setHeroMediaUrl(String heroMediaUrl) { this.heroMediaUrl = heroMediaUrl; }
   public int getCapacity() { return capacity; }
   public boolean isWaitlistEnabled() { return waitlistEnabled; }
   public Instant getCreatedAt() { return createdAt; }

@@ -178,6 +178,12 @@ public class AdminOperationsService {
     PlatformEvent event = new PlatformEvent(category, slug, request.title(), null, request.description(), request.venueName(),
         request.venueAddress(), request.city(), request.startsAt(), request.endsAt(), "Asia/Kolkata",
         request.maxCapacity(), true, actor);
+    
+    // Set banner URL if poster image was uploaded
+    if (request.posterImageUrl() != null && !request.posterImageUrl().isEmpty()) {
+      event.setBannerUrl(request.posterImageUrl());
+    }
+    
     event.updateOperations(request.registrationOpen(), request.allowWalkIns(), request.visibility(),
         request.venueCostPaise(), request.seoTitle(), request.seoDescription(), actor);
     if (request.publish()) event.publish(actor);

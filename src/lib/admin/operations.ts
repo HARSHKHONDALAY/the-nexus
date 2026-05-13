@@ -201,10 +201,21 @@ export async function adminProxyApi<T>(path: string, init?: RequestInit): Promis
 
   let response: Response;
   try {
+    // Explicitly handle FormData to ensure proper multipart content type
+    const isFormData = init?.body instanceof FormData;
+    const headers: Record<string, string> = { ...(init?.headers as Record<string, string> ?? {}) };
+    
+    // Remove any Content-Type header for FormData to let browser set it with boundary
+    if (isFormData && headers['Content-Type']) {
+      delete headers['Content-Type'];
+    } else if (!isFormData && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+    
     response = await fetch(endpoint, {
       ...init,
       credentials: "same-origin",
-      headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+      headers,
     });
   } catch {
     throw new AdminRequestError({

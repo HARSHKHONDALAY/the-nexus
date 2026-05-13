@@ -1,7 +1,7 @@
 import type { PlatformEvent, TicketTier as ApiTicketTier } from "./events";
 
 // Define EventData and TicketTier interfaces locally since @/lib/events was deleted
-interface EventData {
+export interface EventData {
   slug: string;
   eventKey: string;
   title: string;
@@ -34,6 +34,7 @@ interface EventData {
     answer: string;
   }>;
   ticketTiers: TicketTier[];
+  posterImageUrl?: string;
 }
 
 interface TicketTier {
@@ -136,6 +137,7 @@ export function mapPlatformEventToEventData(event: PlatformEvent): EventData {
       }
     ],
     ticketTiers,
+    posterImageUrl: event.bannerUrl,
   };
 }
 

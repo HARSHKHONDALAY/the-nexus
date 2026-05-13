@@ -24,4 +24,5 @@ public record CreateAdminEventRequest(
     boolean allowWalkIns,
     @Size(max = 32) String visibility,
     @Size(max = 220) String seoTitle,
-    @Size(max = 320) String seoDescription) {}
+    @Size(max = 320) String seoDescription,
+    String posterImageUrl) {}

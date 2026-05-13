@@ -207,6 +207,23 @@ export const PerformanceOptimizedCanvas: React.FC<PerformanceOptimizedCanvasProp
   onPerformanceChange,
   enablePerformanceMonitoring = true
 }) => {
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  if (!isClient) {
+    return fallback || (
+      <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-slate-900 to-slate-800">
+        <div className="text-center text-white p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading enhanced experience&hellip;</p>
+        </div>
+      </div>
+    );
+  }
+  
   const capabilities = getDeviceCapabilities();
   
   // Skip Three.js entirely for very low-end devices

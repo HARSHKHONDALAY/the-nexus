@@ -40,16 +40,20 @@ async function proxy(request: Request, params: Promise<{ path: string[] }>) {
   const path = (await params).path.join("/");
   const sourceUrl = new URL(request.url);
   const target = `${apiBaseUrl()}/${path}${sourceUrl.search}`;
-  const body = request.method === "GET" || request.method === "HEAD" ? undefined : await request.text();
+  
+  // Preserve FormData body - don't convert to text
+  const contentType = request.headers.get("Content-Type");
+  const isFormData = contentType?.includes("multipart/form-data");
+  const body = request.method === "GET" || request.method === "HEAD" ? undefined : 
+    isFormData ? await request.formData() : await request.text();
 
   try {
     const headers: Record<string, string> = {
       Authorization: `Bearer ${token}`,
     };
     
-    // Only set Content-Type if it's not FormData (let browser set it for FormData)
-    const contentType = request.headers.get("Content-Type");
-    if (contentType && !contentType.includes("multipart/form-data")) {
+    // Only set Content-Type for non-FormData requests
+    if (!isFormData && contentType) {
       headers["Content-Type"] = contentType;
     }
 

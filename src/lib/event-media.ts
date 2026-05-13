@@ -7,7 +7,7 @@ import type {
   VideoAsset,
 } from "@/data/eventAssetTypes";
 
-import type { EventData } from "@/lib/events";
+import type { EventData } from "@/lib/api/event-mappers";
 
 export type {
   EventAssetSet,
@@ -111,6 +111,23 @@ export function getPrimaryThumbnail(
 export function getEventCardImage(
   event: EventData,
 ): ImageAsset {
+  // If event has a poster image URL, use it
+  if (event?.posterImageUrl) {
+    return {
+      id: "uploaded-poster",
+      src: event.posterImageUrl,
+      alt: event.title || "Event",
+      label: "Uploaded Poster",
+      intent: "thumbnail",
+      orientation: "landscape",
+      aspectRatio: "16/9",
+      width: 1920,
+      height: 1080,
+      quality: "excellent",
+      suitability: ["thumbnail", "gallery", "hero"],
+    };
+  }
+
   const media = getEventMedia(event);
 
   if (event?.slug === "checkmate-chaos") {

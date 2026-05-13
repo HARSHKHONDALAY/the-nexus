@@ -156,16 +156,24 @@ function NetworkField({
 }
 
 export default function DigitalNetworkScene({ pointerX, pointerY }: DigitalNetworkSceneProps) {
+  const [isClient, setIsClient] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const mediaQuery = window.matchMedia("(pointer: coarse)");
     const update = () => setIsCoarsePointer(mediaQuery.matches);
     update();
     mediaQuery.addEventListener("change", update);
     return () => mediaQuery.removeEventListener("change", update);
   }, []);
+
+  if (!isClient) {
+    return (
+      <div className="pointer-events-none absolute inset-[-8%] z-0 bg-gradient-to-br from-slate-900 to-slate-800" />
+    );
+  }
 
   return (
     <div className="pointer-events-none absolute inset-[-8%] z-0">
