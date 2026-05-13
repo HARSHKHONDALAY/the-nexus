@@ -20,7 +20,7 @@ export default function EventFlow({ event }: EventFlowProps) {
       </div>
 
       <ol className="grid gap-4">
-        {event.timeline.map((item, index) => (
+        {event.timeline.map((item: any, index: number) => (
           <li
             key={`${item.time}-${item.title}`}
             className="rounded-3xl border border-white/10 bg-black/45 p-6 md:p-8"

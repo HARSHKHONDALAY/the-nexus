@@ -61,7 +61,7 @@ export default function EventGallery({ event }: EventGalleryProps) {
               </p>
             </div>
           </motion.article>
-        )) : event.gallery.map((item, index) => (
+        )) :event.gallery.map((item: any, index: number) => (
           <motion.article
             key={item}
             initial={{ opacity: 0, y: 24 }}

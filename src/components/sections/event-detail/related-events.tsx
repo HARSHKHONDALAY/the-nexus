@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 import SectionWrapper from "@/components/layout/section-wrapper";
-import { type EventData } from "@/lib/events";
+type EventData = any;
 
 interface RelatedEventsProps {
   currentEvent: EventData;
