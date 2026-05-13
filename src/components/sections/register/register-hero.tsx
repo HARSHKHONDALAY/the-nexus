@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-import type { EventData } from "@/lib/events";
+type EventData = any;
 
 interface RegisterHeroProps {
   event: EventData;

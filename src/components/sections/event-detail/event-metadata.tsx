@@ -1,5 +1,5 @@
 import SectionWrapper from "@/components/layout/section-wrapper";
-import type { EventData } from "@/lib/events";
+type EventData = any;
 
 interface EventMetadataProps {
   event: EventData;

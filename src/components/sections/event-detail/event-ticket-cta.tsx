@@ -4,7 +4,7 @@ import Link from "next/link";
 import Magnetic from "@/components/interactions/magnetic";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import { Button } from "@/components/shared/button";
-import type { EventData } from "@/lib/events";
+type EventData = any;
 
 interface EventTicketCtaProps {
   event: EventData;

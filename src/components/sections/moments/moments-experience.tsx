@@ -13,7 +13,7 @@ import { Button } from "@/components/shared/button";
 import { artAssets } from "@/data/artAssets";
 import { chessAssets } from "@/data/chessAssets";
 import type { ImageAsset } from "@/data/eventAssetTypes";
-import type { EventData } from "@/lib/events";
+type EventData = any;
 import defaultOgImage from "@/../public/branding/og-image.png";
 
 interface MomentsExperienceProps {

@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import { Button } from "@/components/shared/button";
 import { getBackgroundVideo, getPrimaryHeroImage } from "@/lib/event-media";
-import type { EventData } from "@/lib/events";
+type EventData = any;
 
 interface EventCinematicVideoProps {
   event: EventData;

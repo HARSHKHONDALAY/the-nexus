@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import Magnetic from "@/components/interactions/magnetic";
 import { Button } from "@/components/shared/button";
-import type { EventData } from "@/lib/events";
+type EventData = any;
 import TierCard from "@/components/sections/event-detail/registration/tier-card";
 
 function Input({

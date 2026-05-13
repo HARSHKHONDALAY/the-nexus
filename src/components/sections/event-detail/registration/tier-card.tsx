@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Check, Lock } from "lucide-react";
 
-import type { TicketTier } from "@/lib/events";
+type TicketTier = any;
 
 interface TierCardProps {
   tier: TicketTier;

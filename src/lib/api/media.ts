@@ -1,6 +1,6 @@
 import type { PlatformEvent } from "./events";
 import type { EventAssetSet, ImageAsset, VideoAsset } from "@/data/eventAssetTypes";
-import type { EventData } from "@/lib/events";
+type EventData = any;
 
 // Dynamic image asset for backend URLs (different from StaticImageData)
 export interface DynamicImageAsset {

@@ -7,7 +7,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/shared/button";
 import { getEventCardImage } from "@/lib/event-media";
-import type { EventData } from "@/lib/events";
+type EventData = any;
 
 interface EventCardProps {
   event: EventData;
