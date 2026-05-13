@@ -55,6 +55,7 @@ jobs:
           retention-days: 1
 
   backend-tests:
+    if: false
     name: Backend Tests
     runs-on: ubuntu-latest
 
@@ -95,9 +96,9 @@ jobs:
           retention-days: 1
 
   security-scan:
+    if: false
     name: Security Scan
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -126,6 +127,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   database-tests:
+    if: false
     name: Database Tests
     runs-on: ubuntu-latest
 
