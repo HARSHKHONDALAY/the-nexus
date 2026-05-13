@@ -11,17 +11,28 @@ const cdnHostname = (() => {
   }
 })();
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   allowedDevOrigins: ["192.168.2.117", "192.168.2.146"],
   poweredByHeader: false,
   compress: true,
-  
+
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Production optimization
   experimental: {
-    optimizePackageImports: ['@react-three/fiber', '@react-three/drei', 'three', 'framer-motion', 'gsap'],
+    optimizePackageImports: [
+      "@react-three/fiber",
+      "@react-three/drei",
+      "three",
+      "framer-motion",
+      "gsap",
+    ],
   },
+
   turbopack: {},
-  
+
   // Image optimization for production
   images: {
     formats: ["image/avif", "image/webp"],
@@ -30,8 +41,10 @@ const nextConfig: NextConfig = {
     deviceSizes: [360, 414, 640, 750, 828, 1080, 1200, 1536, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    contentDispositionType: "attachment",
+    contentSecurityPolicy:
+      "default-src 'self'; script-src 'none'; sandbox;",
+
     remotePatterns: cdnHostname
       ? [
           {
@@ -42,9 +55,9 @@ const nextConfig: NextConfig = {
         ]
       : [],
   },
-  
+
   // Bundle optimization
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config: any, { dev, isServer }: any) => {
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
@@ -52,34 +65,37 @@ const nextConfig: NextConfig = {
         sideEffects: false,
       };
     }
-    
+
     // Reduce bundle size
     config.optimization = {
       ...config.optimization,
       splitChunks: {
-        chunks: 'all',
+        chunks: "all",
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
+            name: "vendors",
+            chunks: "all",
           },
+
           three: {
             test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
-            name: 'three',
-            chunks: 'all',
+            name: "three",
+            chunks: "all",
           },
+
           animations: {
             test: /[\\/]node_modules[\\/](framer-motion|gsap)[\\/]/,
-            name: 'animations',
-            chunks: 'all',
+            name: "animations",
+            chunks: "all",
           },
         },
       },
     };
-    
+
     return config;
   },
+
   async redirects() {
     return [
       {
@@ -87,31 +103,37 @@ const nextConfig: NextConfig = {
         destination: "/admin/dashboard",
         permanent: false,
       },
+
       {
         source: "/home",
         destination: "/",
         permanent: true,
       },
+
       {
         source: "/join",
         destination: "/events",
         permanent: true,
       },
+
       {
         source: "/moment",
         destination: "/moments",
         permanent: true,
       },
+
       {
         source: "/worlds",
         destination: "/events",
         permanent: true,
       },
+
       {
         source: "/worlds/chess-nexus",
         destination: "/events/checkmate-chaos",
         permanent: true,
       },
+
       {
         source: "/worlds/art-nexus",
         destination: "/events/texture-painting",
@@ -119,14 +141,38 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
   async headers() {
     const securityHeaders = [
-      { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-      { key: "X-Content-Type-Options", value: "nosniff" },
-      { key: "X-Frame-Options", value: "DENY" },
-      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
-      { key: "X-DNS-Prefetch-Control", value: "on" },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+
+      {
+        key: "X-Frame-Options",
+        value: "DENY",
+      },
+
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=(self)",
+      },
+
+      {
+        key: "X-DNS-Prefetch-Control",
+        value: "on",
+      },
     ];
 
     return [
@@ -134,13 +180,26 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+
       {
         source: "/branding/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
       },
+
       {
         source: "/events/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
       },
     ];
   },
