@@ -233,41 +233,7 @@ export default function MomentsExperience({ featuredEvent }: MomentsExperiencePr
         </motion.div>
       </section>
 
-      <section className="relative border-y border-white/10 bg-black/42 py-18 md:py-24">
-        <div className="container-custom">
-          <div className="mb-10 flex flex-col justify-between gap-5 md:mb-14 md:flex-row md:items-end">
-            <div>
-              <p className="text-[0.68rem] uppercase tracking-[0.22em] text-cyan-100/50">Featured Moments</p>
-              <h2 className="mt-4 max-w-3xl text-[2.2rem] font-semibold leading-[1] tracking-[-0.04em] text-white md:text-[3.6rem]">
-                The frames that make the night feel impossible to fake.
-              </h2>
-            </div>
-            <p className="max-w-sm text-[0.95rem] leading-7 text-white/52">
-              Selected for faces, pressure, room texture, and emotional proof.
-            </p>
-          </div>
-
-          <div className="grid auto-rows-[260px] gap-4 md:auto-rows-[310px] md:grid-cols-12 md:gap-5">
-            {featuredMoments.map((asset, index) => (
-              <MomentFrame
-                key={asset?.id ?? `moment-${index}`}
-                asset={asset}
-                index={index}
-                className={
-                  index === 0
-                    ? "md:col-span-7 md:row-span-2"
-                    : index === 1
-                      ? "md:col-span-5"
-                      : index === 2
-                        ? "md:col-span-3 md:row-span-2"
-                        : "md:col-span-9"
-                }
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
+      
       <section className="relative py-20 md:py-30">
         <div className="container-custom space-y-20 md:space-y-28">
           {storyBlocks.map((story, index) => (

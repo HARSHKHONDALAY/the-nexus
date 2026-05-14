@@ -26,6 +26,54 @@ export const metadata = createMetadata({
 
 export default function ContactPage() {
   const featuredEvent = events.find((event) => event.featured) ?? events[0];
+  
+  // Convert legacy Event to EventData for FloatingTicketCta compatibility
+  const eventData = featuredEvent ? {
+    slug: featuredEvent.slug,
+    eventKey: featuredEvent.id,
+    title: featuredEvent.title,
+    world: featuredEvent.type === "chess-nexus" ? "The Chess Nexus" : "The Art Nexus",
+    mood: featuredEvent.type === "chess-nexus" ? "strategic" : "creative",
+    dateISO: featuredEvent.startsAt,
+    type: featuredEvent.type,
+    featured: featuredEvent.featured || false,
+    tagline: featuredEvent.description,
+    date: new Date(featuredEvent.startsAt).toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    }),
+    time: new Date(featuredEvent.startsAt).toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    }),
+    venue: featuredEvent.venueName,
+    city: featuredEvent.city,
+    capacity: (featuredEvent.capacity || 50).toString(),
+    remainingSpots: featuredEvent.capacity || 50,
+    dressCode: "Smart Casual",
+    agePolicy: "18+",
+    priceFrom: featuredEvent.ticketPrice ? `₹${featuredEvent.ticketPrice}` : "Free",
+    description: featuredEvent.description,
+    longDescription: featuredEvent.description,
+    gallery: [],
+    vibePoints: [],
+    timeline: [],
+    faqs: [],
+    community: [],
+    ticketTiers: featuredEvent.ticketPrice ? [{
+      id: 'default',
+      name: 'General Admission',
+      price: featuredEvent.ticketPrice.toString(),
+      status: 'available' as const,
+      note: '',
+      perks: []
+    }] : [],
+    registration: {
+      open: featuredEvent.status === 'published' || featuredEvent.status === 'live',
+      closesAt: featuredEvent.endsAt
+    }
+  } : null;
 
   return (
     <>
@@ -42,7 +90,7 @@ export default function ContactPage() {
         <ContactIntro />
         <ContactMethods />
       </main>
-      <FloatingTicketCta event={featuredEvent} />
+      <FloatingTicketCta event={eventData} />
       <FooterEcosystem />
     </>
   );
