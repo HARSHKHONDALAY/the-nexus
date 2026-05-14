@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import Magnetic from "@/components/interactions/magnetic";
 import { Button } from "@/components/shared/button";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 
 interface FeaturedEventProps {
   event: EventData | null | undefined;

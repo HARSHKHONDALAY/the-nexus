@@ -27,7 +27,7 @@ export default function AdminAuditLogsPage() {
             <div key={log.id} className="relative grid gap-4 border-l border-lime-300/24 pl-6 md:grid-cols-[220px_1fr]">
               <span className="absolute -left-2 top-1 h-4 w-4 rounded-full border border-lime-200/30 bg-lime-300 shadow-[0_0_25px_rgba(56,189,248,0.45)]" />
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-lime-100/42">{formatDateTime(log.createdAt)}</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-lime-100/42">{formatDateTime(log.created_at)}</p>
                 <p className="mt-2 text-sm text-lime-100/58">{log.actor}</p>
               </div>
               <div className="rounded-3xl border border-lime-200/12 bg-black/24 p-5">

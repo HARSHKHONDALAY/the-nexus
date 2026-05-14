@@ -156,12 +156,11 @@ function NetworkField({
 }
 
 export default function DigitalNetworkScene({ pointerX, pointerY }: DigitalNetworkSceneProps) {
-  const [isClient, setIsClient] = useState(false);
+  const isClient = typeof window !== "undefined";
   const prefersReducedMotion = useReducedMotion();
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
     const mediaQuery = window.matchMedia("(pointer: coarse)");
     const update = () => setIsCoarsePointer(mediaQuery.matches);
     update();

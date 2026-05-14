@@ -6,80 +6,80 @@ async function main() {
   // Create only ONE chess event for production
   const events = [
     {
-      eventKey: "chess-social-night-2026-06-15",
+      category_id: "chess-category-id", // Will need to create this first
+      slug: "chess-social-night-2026-06-15",
       title: "Chess Social Night",
-      eventDate: new Date("2026-06-15"),
-      dateLabel: "15/06/2026",
-      timeLabel: "07:00PM TO 11:00PM",
-      venue: "The Chess Club",
-      locationShort: "Bandra",
-      price: 1500,
-      venueCost: 15000,
-      maxSeats: 50,
-      upiId: "Khushalnile06-1@okaxis",
-      whatsappLink: "https://chat.whatsapp.com/FFFQ73MMhDk43xTr6muKFM?mode=hqctcli",
+      description: "A premium chess social experience for enthusiasts",
+      starts_at: new Date("2026-06-15T19:00:00Z"),
+      ends_at: new Date("2026-06-15T23:00:00Z"),
+      venue_name: "The Chess Club",
+      venue_address: "Bandra West, Mumbai",
+      city: "Mumbai",
+      capacity: 50,
+      venue_cost_paise: 1500000,
       status: "PUBLISHED" as const,
-      registrationClosed: false,
-      archivedToPast: false,
+      registration_open: true,
+      allow_walk_ins: true,
+      visibility: "PUBLIC" as const,
     },
   ];
 
+  // First create event category
+  const chessCategory = await prisma.event_categories.upsert({
+    where: { slug: "chess-nexus" },
+    update: {},
+    create: {
+      slug: "chess-nexus",
+      name: "Chess Nexus",
+      description: "Premium chess events and experiences",
+      active: true,
+    },
+  });
+
+  // Update the event with the actual category ID
+  events[0].category_id = chessCategory.id;
+
   for (const event of events) {
-    await prisma.event.upsert({
-      where: { eventKey: event.eventKey },
+    await prisma.platform_events.upsert({
+      where: { slug: event.slug },
       update: event,
       create: event,
     });
   }
 
-  const chessEvent = await prisma.event.findUniqueOrThrow({ where: { eventKey: "chess-social-night-2026-06-15" } });
+  const chessEvent = await prisma.platform_events.findUniqueOrThrow({ where: { slug: "chess-social-night-2026-06-15" } });
 
-  await prisma.registration.upsert({
-    where: { eventId_contactNumber: { eventId: chessEvent.id, contactNumber: "9000000001" } },
+  await prisma.bookings.upsert({
+    where: { booking_reference: "CHESS-2026-06-15-001" },
     update: {},
     create: {
-      eventId: chessEvent.id,
-      fullName: "Aarav Mehta",
-      contactNumber: "9000000001",
-      email: "aarav@nexus.local",
-      instagramId: "@aarav.moves",
-      age: 27,
-      locationArea: "Bandra",
-      occupation: "Founder",
-      workingSector: "Consumer Tech",
-      whatsappOptIn: true,
-      chessLevel: "INTERMEDIATE",
-      dietaryPreference: "Vegetarian",
-      paymentScreenshotUrl: "https://example.com/payment/aarav.png",
-      agreementAccepted: true,
-      checkInStatus: "NOT_CHECKED_IN",
-      sourceType: "WEBSITE",
-      paymentStatus: "VERIFIED",
-      registrationStatus: "CONFIRMED",
-      eventTitleSnapshot: chessEvent.title,
-      eventDateSnapshot: chessEvent.eventDate,
-      eventTimeSnapshot: chessEvent.timeLabel,
-      eventVenueSnapshot: chessEvent.venue,
+      booking_reference: "CHESS-2026-06-15-001",
+      event_id: chessEvent.id,
+      ticket_tier_id: "default-tier-id", // Will need to create this first
+      attendee_name: "Aarav Mehta",
+      attendee_email: "aarav@nexus.local",
+      attendee_phone: "9000000001",
+      quantity: 1,
+      amount_paise: 150000,
+      status: "CONFIRMED",
     },
   });
 
-  await prisma.financeAdjustment.create({
+  await prisma.finance_entries.create({
     data: {
-      eventId: chessEvent.id,
-      section: "EXPENSE",
-      operator: "ADD",
-      amount: 1487,
-      comment: "Ads",
+      event_id: chessEvent.id,
+      entry_type: "EXPENSE",
+      amount_paise: 148700,
+      note: "Ads",
     },
   });
 
-  await prisma.auditLog.create({
+  await prisma.platform_audit_logs.create({
     data: {
-      eventId: chessEvent.id,
-      actionKey: "seed.admin_bootstrap",
-      actionLabel: "Admin seed bootstrap",
-      details: "Seeded The Nexus admin operating database foundation.",
-      metadata: { source: "prisma/seed.ts" },
+      entity_id: chessEvent.id,
+      entity_type: "EVENT",
+      action: "seed.admin_bootstrap",
+      metadata: JSON.stringify({ source: "prisma/seed.ts" }),
     },
   });
 }

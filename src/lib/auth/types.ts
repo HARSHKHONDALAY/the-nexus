@@ -28,7 +28,7 @@ export type AuthUser = {
   assignedEcosystemSlug?: string | null;
   roles: NexusRole[];
   permissions: NexusPermission[];
-  createdAt: string;
+  created_at: string;
 };
 
 export type AuthResponse = {

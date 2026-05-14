@@ -3,10 +3,10 @@
 import { motion } from "framer-motion";
 import { Check, Lock } from "lucide-react";
 
-type TicketTier = any;
+import type { TicketTierData } from "@/lib/types/api";
 
 interface TierCardProps {
-  tier: TicketTier;
+  tier: TicketTierData;
   selected: boolean;
   onSelect: () => void;
 }
@@ -53,7 +53,7 @@ export default function TierCard({
           </p>
 
           <p className="mt-4 text-3xl font-semibold tracking-tight text-lime-50">
-            {tier.price}
+            {tier.price || '₹0.00'}
           </p>
 
           <p className="mt-3 text-lime-100/62">
@@ -81,7 +81,7 @@ export default function TierCard({
 
       <ul className="mt-6 space-y-3">
         {(tier.perks || []).map(
-          (perk: any, index: number) => (
+          (perk: string, index: number) => (
             <li
               key={`${perk}-${index}`}
               className="flex items-start gap-3 text-sm text-lime-100/70"

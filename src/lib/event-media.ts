@@ -1,13 +1,10 @@
-import { artAssets } from "@/data/artAssets";
-import { chessAssets } from "@/data/chessAssets";
+import type { EventData } from "@/lib/api/event-mappers";
 
 import type {
   EventAssetSet,
   ImageAsset,
   VideoAsset,
 } from "@/data/eventAssetTypes";
-
-import type { EventData } from "@/lib/api/event-mappers";
 
 export type {
   EventAssetSet,
@@ -30,9 +27,9 @@ const FALLBACK_IMAGE: ImageAsset = {
 
   aspectRatio: "16/9",
 
-  width: 1920,
+  width: 1200,
 
-  height: 1080,
+  height: 800,
 
   quality: "usable",
 
@@ -43,8 +40,8 @@ const FALLBACK_IMAGE: ImageAsset = {
   ],
 };
 
-const FALLBACK_ASSET_SET: EventAssetSet = {
-  world: "The Chess Nexus",
+const GENERIC_FALLBACK_SET: EventAssetSet = {
+  world: "The Chess Nexus", // Use valid type for compatibility
 
   tone: ["fallback"],
 
@@ -63,25 +60,12 @@ const FALLBACK_ASSET_SET: EventAssetSet = {
   posters: [FALLBACK_IMAGE],
 };
 
-export const eventAssetSets: Partial<
-  Record<EventData["world"], EventAssetSet>
-> = {
-  "The Chess Nexus": chessAssets,
-
-  "The Art Nexus": artAssets,
-};
-
 export function getEventMedia(
-  event: EventData,
+  _event: EventData,
 ): EventAssetSet {
-  if (!event?.world) {
-    return FALLBACK_ASSET_SET;
-  }
-
-  return (
-    eventAssetSets[event.world] ??
-    FALLBACK_ASSET_SET
-  );
+  // Always return generic fallback - no event-specific assets
+  void _event; // Explicitly mark as unused
+  return GENERIC_FALLBACK_SET;
 }
 
 export function getPrimaryHeroImage(
@@ -130,47 +114,6 @@ export function getEventCardImage(
 
   const media = getEventMedia(event);
 
-  if (event?.slug === "checkmate-chaos") {
-    return (
-      media?.galleryImages?.find(
-        (asset) =>
-          asset.id ===
-          "chess-community-proof",
-      ) ??
-      media?.galleryImages?.[0] ??
-      getPrimaryThumbnail(event)
-    );
-  }
-
-  if (event?.slug === "chess-social-night") {
-    return (
-      media?.galleryImages?.find(
-        (asset) =>
-          asset.id ===
-          "chess-main-floor",
-      ) ??
-      media?.galleryImages?.find(
-        (asset) =>
-          asset.id ===
-          "chess-social-signal",
-      ) ??
-      media?.galleryImages?.[0] ??
-      getPrimaryThumbnail(event)
-    );
-  }
-
-  if (event?.slug === "texture-painting") {
-    return (
-      media?.galleryImages?.find(
-        (asset) =>
-          asset.id ===
-          "art-community-showcase",
-      ) ??
-      media?.galleryImages?.[0] ??
-      getPrimaryThumbnail(event)
-    );
-  }
-
   return (
     media?.galleryImages?.[0] ??
     media?.thumbnails?.[0] ??
@@ -185,7 +128,7 @@ export function getBackgroundVideo(
   const media = getEventMedia(event);
 
   return media?.videos?.find(
-    (video) =>
+    (video: VideoAsset) =>
       video?.usability ===
         "background" && !!video?.src,
   );

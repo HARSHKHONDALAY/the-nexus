@@ -49,11 +49,11 @@ interface TicketTier {
 // Map backend PlatformEvent to frontend EventData interface
 export function mapPlatformEventToEventData(event: PlatformEvent): EventData {
   // Convert ticket tiers
-  const ticketTiers: TicketTier[] = event.ticketTiers?.map(mapApiTicketTier) || [
+  const ticketTiers: TicketTier[] = event.ticket_tiers?.map(mapApiTicketTier) || [
     {
       id: "general",
       name: "General Entry",
-      price: `INR ${Math.round((event.ticketTiers?.[0]?.pricePaise || 60000) / 100)}`,
+      price: `INR ${Math.round((event.ticket_tiers?.[0]?.price_paise || 60000) / 100)}`,
       note: "Standard access to the event",
       perks: ["All-room access", "Community flow"],
       status: "available" as const,
@@ -70,36 +70,46 @@ export function mapPlatformEventToEventData(event: PlatformEvent): EventData {
                            eventType.includes("Art") ? "Experience" : 
                            "Session";
 
+  function safeFormatDate(dateString: string, format: 'date' | 'time'): string {
+    const date = new Date(dateString);
+    if (!isFinite(date.getTime())) {
+      return format === 'date' ? 'Invalid Date' : 'Invalid Time';
+    }
+    
+    if (format === 'date') {
+      return date.toLocaleDateString("en-IN", {
+        weekday: "long",
+        year: "numeric", 
+        month: "long",
+        day: "numeric"
+      });
+    } else {
+      return date.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+  }
+
   return {
     slug: event.slug,
     eventKey: event.slug, // Use slug as eventKey for now
     title: event.title,
     world: eventType as "The Chess Nexus" | "The Art Nexus",
     mood: event.subtitle || "Premium curated experience",
-    dateISO: event.startsAt,
+    dateISO: event.starts_at,
     type: eventClassification as "Salon" | "Session" | "Night" | "Experience",
     featured: event.status === "PUBLISHED" || event.status === "LIVE", // Use status to determine featured
     tagline: event.subtitle || event.description.substring(0, 100) + "...",
-    date: new Date(event.startsAt).toLocaleDateString("en-IN", {
-      weekday: "long",
-      year: "numeric", 
-      month: "long",
-      day: "numeric"
-    }),
-    time: `${new Date(event.startsAt).toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })} - ${new Date(event.endsAt).toLocaleTimeString("en-IN", {
-      hour: "2-digit", 
-      minute: "2-digit"
-    })}`,
-    venue: event.venueName,
+    date: safeFormatDate(event.starts_at, 'date'),
+    time: `${safeFormatDate(event.starts_at, 'time')} - ${safeFormatDate(event.ends_at, 'time')}`,
+    venue: event.venue_name,
     city: event.city,
     capacity: `${event.capacity} members`,
-    remainingSpots: Math.max(0, event.capacity - (event.ticketTiers?.[0]?.soldCount || 0)),
+    remainingSpots: Math.max(0, event.capacity - (event.ticket_tiers?.[0]?.sold_count || 0)),
     dressCode: "Smart casual",
     agePolicy: "21+",
-    priceFrom: `INR ${Math.round((event.ticketTiers?.[0]?.pricePaise || 60000) / 100)}`,
+    priceFrom: `INR ${Math.round((event.ticket_tiers?.[0]?.price_paise || 60000) / 100)}`,
     description: event.description.substring(0, 150) + "...",
     longDescription: event.description,
     gallery: ["Event gallery", "Venue photos", "Community moments"], // Placeholder
@@ -110,18 +120,12 @@ export function mapPlatformEventToEventData(event: PlatformEvent): EventData {
     ],
     timeline: [
       {
-        time: new Date(event.startsAt).toLocaleTimeString("en-IN", {
-          hour: "2-digit",
-          minute: "2-digit"
-        }),
+        time: safeFormatDate(event.starts_at, 'time'),
         title: "Arrival & Check-in",
         description: "Welcome and registration"
       },
       {
-        time: new Date(event.startsAt).toLocaleTimeString("en-IN", {
-          hour: "2-digit",
-          minute: "2-digit"
-        }),
+        time: safeFormatDate(event.starts_at, 'time'),
         title: "Main Event",
         description: "Primary event activities"
       }
@@ -137,7 +141,7 @@ export function mapPlatformEventToEventData(event: PlatformEvent): EventData {
       }
     ],
     ticketTiers,
-    posterImageUrl: event.bannerUrl,
+    posterImageUrl: event.banner_url,
   };
 }
 
@@ -146,11 +150,11 @@ function mapApiTicketTier(tier: ApiTicketTier): TicketTier {
   return {
     id: tier.id,
     name: tier.name,
-    price: `INR ${Math.round(tier.pricePaise / 100)}`,
+    price: `INR ${Math.round(tier.price_paise / 100)}`,
     note: tier.description || "Standard access",
     perks: ["All-room access", "Community flow"],
-    status: tier.soldCount >= tier.capacity ? "sold_out" as const : 
-            tier.soldCount > tier.capacity * 0.8 ? "limited" as const : 
+    status: tier.sold_count >= tier.capacity ? "sold_out" as const : 
+            tier.sold_count > tier.capacity * 0.8 ? "limited" as const : 
             "available" as const,
   };
 }

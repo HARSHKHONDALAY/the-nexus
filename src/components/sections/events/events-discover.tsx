@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 import SectionWrapper from "@/components/layout/section-wrapper";
 import EventCard from "@/components/sections/events/event-card";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 
 type WorldFilter = "all" | "The Chess Nexus" | "The Art Nexus";
 type TimeFilter = "all" | "this-month" | "next-month";

@@ -246,7 +246,8 @@ public class AdminOperationsService {
         source.isAllowWalkIns(),
         source.getVisibility(),
         source.getSeoTitle(),
-        source.getSeoDescription());
+        source.getSeoDescription(),
+        source.getBannerUrl());
     return createEvent(request, actor);
   }
 
@@ -456,7 +457,7 @@ public class AdminOperationsService {
     
     adminAuthorizationService.assertCanAccessEvent(actor, event);
     
-    switch (request.action()) {
+    switch (request.action().toLowerCase()) {
       case "close_registrations" -> event.closeRegistrations(actor);
       case "open_registrations" -> event.openRegistrations(actor);
       case "mark_live" -> event.markLive(actor);

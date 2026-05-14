@@ -10,21 +10,21 @@ type Tab = "current" | "past" | "create";
 const initialForm = {
   title: "",
   eventType: "Chess Nexus",
-  startsAt: "",
-  endsAt: "",
-  venueName: "",
-  venueAddress: "",
+  starts_at: "",
+  ends_at: "",
+  venue_name: "",
+  venue_address: "",
   city: "Mumbai",
   ticketPrice: "600",
   venueCost: "0",
   maxCapacity: "80",
   description: "",
-  registrationOpen: true,
+  registration_open: true,
   publish: false,
-  allowWalkIns: true,
+  allow_walk_ins: true,
   visibility: "PUBLIC",
-  seoTitle: "",
-  seoDescription: "",
+  seo_title: "",
+  seo_description: "",
   posterImage: null as File | null,
 };
 
@@ -39,6 +39,7 @@ export default function AdminEventsClient() {
     current: false,
     past: false,
   });
+  const [selectedEvent, setSelectedEvent] = useState<AdminEvent | null>(null);
 
   const loadCurrent = async () => {
     try {
@@ -97,13 +98,46 @@ export default function AdminEventsClient() {
   async function mutateEvent(eventId: string, action: string) {
     setMessage("");
     try {
-      await adminApi<AdminEvent>(`/events/${eventId}/status`, { method: "PATCH", body: JSON.stringify({ action }) });
+      // Find the event in current events
+      const event = current.find(e => e.id === eventId);
+      
+      // Map frontend actions to backend action values
+      let backendAction: string;
+      switch (action) {
+        case "mark_live":
+          backendAction = "MARK_LIVE";
+          break;
+        case "move_to_past":
+          backendAction = "MOVE_PAST";
+          break;
+        case "close_registrations":
+          backendAction = "CLOSE_REGISTRATIONS";
+          break;
+        case "open_registrations":
+          backendAction = "OPEN_REGISTRATIONS";
+          // Show event details when opening registrations
+          if (event) {
+            setSelectedEvent(event);
+          }
+          break;
+        default:
+          backendAction = "OPEN";
+      }
+      
+      await adminApi<AdminEvent>(`/events/${eventId}/status`, { method: "PATCH", body: JSON.stringify({ action: backendAction }) });
       await load("current");
       if (loadedTabs.past) {
         await loadPast();
       }
     } catch (reason) {
       setMessage(formatAdminError(reason, "Event action failed."));
+    }
+  }
+
+  async function showEventDetails(eventId: string) {
+    const event = current.find(e => e.id === eventId);
+    if (event) {
+      setSelectedEvent(event);
     }
   }
 
@@ -140,24 +174,34 @@ export default function AdminEventsClient() {
       const formData = new FormData();
       
       // Add all form fields as JSON
+      // Ensure startsAt is valid
+      let startDate = new Date(form.starts_at);
+      if (!form.starts_at || !isFinite(startDate.getTime())) {
+        // If no valid start date, use current time
+        startDate = new Date();
+      }
+      
+      // Auto-generate endsAt (startsAt + 4 hours)
+      const endDate = new Date(startDate.getTime() + (4 * 60 * 60 * 1000));
+      
       const eventData = {
         title: form.title,
         eventType: form.eventType,
-        startsAt: new Date(form.startsAt).toISOString(),
-        endsAt: new Date(form.endsAt).toISOString(),
-        venueName: form.venueName,
-        venueAddress: form.venueAddress,
+        startsAt: startDate.toISOString(),
+        endsAt: endDate.toISOString(),
+        venueName: form.venue_name || "TBD Venue",
+        venue_address: form.venue_address,
         city: form.city,
         ticketPricePaise: Math.round(Number(form.ticketPrice) * 100),
         venueCostPaise: Math.round(Number(form.venueCost) * 100),
         maxCapacity: Number(form.maxCapacity),
         description: form.description,
-        registrationOpen: form.registrationOpen,
+        registration_open: form.registration_open,
         publish: form.publish,
-        allowWalkIns: form.allowWalkIns,
+        allow_walk_ins: form.allow_walk_ins,
         visibility: form.visibility,
-        seoTitle: form.seoTitle,
-        seoDescription: form.seoDescription,
+        seo_title: form.seo_title,
+        seo_description: form.seo_description,
       };
       
       formData.append('eventData', JSON.stringify(eventData));
@@ -209,10 +253,10 @@ export default function AdminEventsClient() {
           <form onSubmit={create} className="grid gap-5 lg:grid-cols-2">
             <Field label="Event Title" value={form.title} onChange={(title) => setForm({ ...form, title })} required />
             <Select label="Event Type" value={form.eventType} onChange={(eventType) => setForm({ ...form, eventType })} options={["Chess Nexus", "Art Nexus"]} />
-            <Field label="Start Time" type="datetime-local" value={form.startsAt} onChange={(startsAt) => setForm({ ...form, startsAt })} required />
-            <Field label="End Time" type="datetime-local" value={form.endsAt} onChange={(endsAt) => setForm({ ...form, endsAt })} required />
-            <Field label="Venue Name" value={form.venueName} onChange={(venueName) => setForm({ ...form, venueName })} required />
-            <Field label="Venue Address" value={form.venueAddress} onChange={(venueAddress) => setForm({ ...form, venueAddress })} />
+            <Field label="Start Time" type="datetime-local" value={form.starts_at} onChange={(starts_at) => setForm({ ...form, starts_at })} required />
+            <Field label="End Time" type="datetime-local" value={form.ends_at} onChange={(ends_at) => setForm({ ...form, ends_at })} required />
+            <Field label="Venue Name" value={form.venue_name} onChange={(venue_name) => setForm({ ...form, venue_name })} required />
+            <Field label="Venue Address" value={form.venue_address} onChange={(venue_address) => setForm({ ...form, venue_address })} />
             <Field label="Ticket Price INR" type="number" value={form.ticketPrice} onChange={(ticketPrice) => setForm({ ...form, ticketPrice })} required />
             <Field label="Venue Cost INR" type="number" value={form.venueCost} onChange={(venueCost) => setForm({ ...form, venueCost })} />
             <Field label="Max Capacity" type="number" value={form.maxCapacity} onChange={(maxCapacity) => setForm({ ...form, maxCapacity })} required />
@@ -242,10 +286,10 @@ export default function AdminEventsClient() {
                 </div>
               )}
             </label>
-            <Field label="SEO Title" value={form.seoTitle} onChange={(seoTitle) => setForm({ ...form, seoTitle })} />
-            <Field label="SEO Description" value={form.seoDescription} onChange={(seoDescription) => setForm({ ...form, seoDescription })} />
-            <Toggle label="Open registrations" checked={form.registrationOpen} onChange={(registrationOpen) => setForm({ ...form, registrationOpen })} />
-            <Toggle label="Allow walk-ins" checked={form.allowWalkIns} onChange={(allowWalkIns) => setForm({ ...form, allowWalkIns })} />
+            <Field label="SEO Title" value={form.seo_title} onChange={(seo_title) => setForm({ ...form, seo_title })} />
+            <Field label="SEO Description" value={form.seo_description} onChange={(seo_description) => setForm({ ...form, seo_description })} />
+            <Toggle label="Open registrations" checked={form.registration_open} onChange={(registration_open) => setForm({ ...form, registration_open })} />
+            <Toggle label="Allow walk-ins" checked={form.allow_walk_ins} onChange={(allow_walk_ins) => setForm({ ...form, allow_walk_ins })} />
             <Toggle label="Publish immediately" checked={form.publish} onChange={(publish) => setForm({ ...form, publish })} />
             <div className="lg:col-span-2"><AdminButton type="submit">Create Real Event</AdminButton></div>
           </form>
@@ -260,11 +304,11 @@ export default function AdminEventsClient() {
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
                     <StatusChip tone={event.status === "LIVE" ? "lime" : event.status === "CLOSED" ? "neutral" : "blue"}>{event.status}</StatusChip>
-                    <StatusChip tone={event.registrationOpen ? "lime" : "red"}>{event.registrationOpen ? "Registration Open" : "Registration Closed"}</StatusChip>
+                    <StatusChip tone={event.registration_open ? "lime" : "red"}>{event.registration_open ? "Registration Open" : "Registration Closed"}</StatusChip>
                     <StatusChip tone="neutral">{event.world}</StatusChip>
                   </div>
                   <h3 className="mt-5 font-serif text-4xl tracking-[-0.04em] text-lime-50">{event.title}</h3>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-lime-100/58">{formatDateTime(event.startsAt)} · {event.venueName}</p>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-lime-100/58">{formatDateTime(event.starts_at)} · {event.venue_name}</p>
                   <div className="mt-6 grid gap-3 sm:grid-cols-4">
                     <span className="rounded-2xl bg-lime-200/[0.045] p-4 text-sm text-lime-100/70">{formatMoney(event.ticketPricePaise)} ticket</span>
                     <span className="rounded-2xl bg-lime-200/[0.045] p-4 text-sm text-lime-100/70">{event.capacity} seats</span>
@@ -275,7 +319,8 @@ export default function AdminEventsClient() {
                 <div className="rounded-[1.75rem] border border-lime-200/10 bg-black/24 p-5">
                   <p className="text-xs uppercase tracking-[0.26em] text-lime-100/42">Quick Operations</p>
                   <div className="mt-5 grid grid-cols-2 gap-3">
-                    <AdminButton variant="ghost" onClick={() => mutateEvent(event.id, event.registrationOpen ? "close_registrations" : "open_registrations")}>{event.registrationOpen ? "Close" : "Open"}</AdminButton>
+                    <AdminButton variant="ghost" onClick={() => mutateEvent(event.id, event.registration_open ? "close_registrations" : "open_registrations")}>{event.registration_open ? "Close" : "Open"}</AdminButton>
+                    <AdminButton variant="ghost" onClick={() => showEventDetails(event.id)}>View Details</AdminButton>
                     <AdminButton variant="ghost" onClick={() => mutateEvent(event.id, "mark_live")}>Mark Live</AdminButton>
                     <AdminButton variant="ghost" onClick={() => mutateEvent(event.id, "move_to_past")}>Move Past</AdminButton>
                     <AdminButton variant="ghost" onClick={() => duplicate(event.id)}>Duplicate</AdminButton>
@@ -292,6 +337,106 @@ export default function AdminEventsClient() {
             </AdminCard>
           ))}
         </section>
+      )}
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-lime-200/20 bg-black/90 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-lime-50">Event Details & Registration</h2>
+              <AdminButton variant="ghost" onClick={() => setSelectedEvent(null)}>Close</AdminButton>
+            </div>
+            
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Event Information */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-lime-50 mb-2">{selectedEvent.title}</h3>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <StatusChip tone={selectedEvent.status === "LIVE" ? "lime" : selectedEvent.status === "CLOSED" ? "neutral" : "blue"}>{selectedEvent.status}</StatusChip>
+                    <StatusChip tone={selectedEvent.registration_open ? "lime" : "red"}>{selectedEvent.registration_open ? "Registration Open" : "Registration Closed"}</StatusChip>
+                    <StatusChip tone="neutral">{selectedEvent.world}</StatusChip>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Date & Time</p>
+                    <p className="text-lime-50">{formatDateTime(selectedEvent.starts_at)}</p>
+                  </div>
+                  
+                  <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Venue</p>
+                    <p className="text-lime-50">{selectedEvent.venue_name}</p>
+                    {selectedEvent.venue_address && <p className="text-sm text-lime-100/70">{selectedEvent.venue_address}</p>}
+                  </div>
+                  
+                                  </div>
+              </div>
+              
+              {/* Registration Statistics */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-lime-50">Registration Statistics</h4>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Ticket Price</p>
+                    <p className="text-lg font-bold text-lime-50">{formatMoney(selectedEvent.ticketPricePaise)}</p>
+                  </div>
+                  
+                  <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Capacity</p>
+                    <p className="text-lg font-bold text-lime-50">{selectedEvent.capacity}</p>
+                  </div>
+                  
+                  <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Registrations</p>
+                    <p className="text-lg font-bold text-lime-50">{selectedEvent.registrations}</p>
+                  </div>
+                  
+                  <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                    <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Checked In</p>
+                    <p className="text-lg font-bold text-lime-50">{selectedEvent.checkedIn}</p>
+                  </div>
+                </div>
+                
+                <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Revenue</p>
+                  <p className="text-lg font-bold text-lime-50">{formatMoney(selectedEvent.registrations * selectedEvent.ticketPricePaise)}</p>
+                  <p className="text-sm text-lime-100/70 mt-1">From {selectedEvent.registrations} registrations</p>
+                </div>
+                
+                <div className="rounded-xl border border-lime-200/10 bg-black/30 p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-lime-100/50 mb-1">Occupancy Rate</p>
+                  <p className="text-lg font-bold text-lime-50">
+                    {selectedEvent.capacity > 0 ? Math.round((selectedEvent.registrations / selectedEvent.capacity) * 100) : 0}%
+                  </p>
+                  <p className="text-sm text-lime-100/70 mt-1">{selectedEvent.registrations} of {selectedEvent.capacity} seats filled</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Registration Actions */}
+            <div className="mt-6 pt-6 border-t border-lime-200/10">
+              <h4 className="text-lg font-semibold text-lime-50 mb-4">Registration Actions</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <AdminButton 
+                  onClick={() => {
+                    mutateEvent(selectedEvent.id, selectedEvent.registration_open ? "close_registrations" : "open_registrations");
+                    setSelectedEvent(null);
+                  }}
+                  variant={selectedEvent.registration_open ? "ghost" : "primary"}
+                >
+                  {selectedEvent.registration_open ? "Close Registrations" : "Open Registrations"}
+                </AdminButton>
+                <AdminButton variant="ghost" onClick={() => window.open(`/events/${selectedEvent.slug}`, '_blank')}>View Public Page</AdminButton>
+                <AdminButton variant="ghost" onClick={() => window.open(`/register/${selectedEvent.slug}`, '_blank')}>View Registration</AdminButton>
+                <AdminButton variant="ghost" onClick={() => setSelectedEvent(null)}>Close Details</AdminButton>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

@@ -6,10 +6,15 @@ import Link from "next/link";
 
 import { Button } from "@/components/shared/button";
 
-export default function EventsHero() {
-  // Static fallback values for now - will be updated by parent component
-  const eventTitle = "Checkmate & Chaos";
-  const eventSlug = "checkmate-chaos";
+interface EventsHeroProps {
+  featuredEvent?: {
+    title?: string;
+    slug?: string;
+  };
+}
+
+export default function EventsHero({ featuredEvent }: EventsHeroProps) {
+  const eventSlug = featuredEvent?.slug || "";
 
   return (
     <section className="relative isolate min-h-[72vh] overflow-hidden bg-black">

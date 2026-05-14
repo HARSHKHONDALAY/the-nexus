@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/shared/button";
-import { getPublicEvents } from "@/lib/api/events";
 
 const footerGroups = [
   {
@@ -28,10 +27,15 @@ const footerGroups = [
   },
 ];
 
-export default function FooterEcosystem() {
-  // Static fallback values for now - will be updated by parent component
-  const eventTitle = "Checkmate & Chaos";
-  const eventSlug = "checkmate-chaos";
+interface FooterEcosystemProps {
+  featuredEvent?: {
+    title?: string;
+    slug?: string;
+  };
+}
+
+export default function FooterEcosystem({ featuredEvent }: FooterEcosystemProps) {
+  const eventSlug = featuredEvent?.slug || "";
 
   return (
     <footer className="relative overflow-hidden border-t border-lime-200/15 bg-black pb-24 pt-18 md:pb-10 md:pt-20">

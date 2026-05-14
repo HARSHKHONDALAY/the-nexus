@@ -29,7 +29,7 @@ Swagger UI is available at `http://localhost:8080/api/docs`.
 ## Required Environment
 
 ```bash
-DATABASE_URL=jdbc:postgresql://localhost:5432/the_nexus
+DATABASE_URL="postgresql://postgres:@localhost:5432/the_nexus"
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=postgres
 JWT_SECRET=replace-with-at-least-32-characters

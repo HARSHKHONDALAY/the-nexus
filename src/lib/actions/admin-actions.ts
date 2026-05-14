@@ -30,8 +30,8 @@ export async function restoreArchivedEventAction(eventId: string) {
   return event;
 }
 
-export async function setRegistrationClosedAction(eventId: string, registrationClosed: boolean) {
-  const event = await setRegistrationClosed(eventId, registrationClosed);
+export async function setRegistrationClosedAction(eventId: string, registration_open: boolean) {
+  const event = await setRegistrationClosed(eventId, registration_open);
   revalidatePath("/admin/events");
   return event;
 }

@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createEventSchema = z.object({
   eventKey: z.string().min(3).max(120),
   title: z.string().min(2).max(255),
-  eventDate: z.coerce.date(),
+  starts_at: z.coerce.date(),
   dateLabel: z.string().min(1).max(50),
   timeLabel: z.string().min(1).max(100),
   venue: z.string().min(1).max(255),
@@ -37,12 +37,10 @@ export const createRegistrationSchema = z.object({
 });
 
 export const financeAdjustmentSchema = z.object({
-  eventId: z.string().min(1),
-  section: z.enum(["REVENUE", "VENUE_COST", "EXPENSE", "REFUND", "OPERATIONS", "DISCOUNT"]),
-  operator: z.enum(["ADD", "SUBTRACT"]).default("ADD"),
-  amount: z.coerce.number().nonnegative(),
-  comment: z.string().optional(),
-  createdBy: z.string().optional(),
+  event_id: z.string().min(1),
+  entry_type: z.enum(["REVENUE", "EXPENSE", "REFUND", "MISC"]),
+  amount_paise: z.coerce.number().nonnegative(),
+  note: z.string().optional(),
 });
 
 export const bulkAttendeeOperationSchema = z.object({

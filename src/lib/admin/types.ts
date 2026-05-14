@@ -1,7 +1,7 @@
-export type EventStatus = "draft" | "published" | "live" | "closed" | "archived";
-export type PaymentStatus = "pending" | "verified" | "rejected" | "refunded";
-export type SourceType = "website" | "manual" | "instagram" | "partner" | "walk_in";
-export type CheckInState = "not_checked_in" | "checked_in" | "late" | "no_show";
+import type { EventStatus, PaymentStatus, BookingSource, TicketStatus } from "@/lib/types/prisma-enums";
+
+export type SourceType = BookingSource;
+export type CheckInState = TicketStatus;
 
 export interface AdminEvent {
   id: string;

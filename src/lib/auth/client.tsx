@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [status]);
 
   useEffect(() => {
     if (status === "authenticated" && user) {

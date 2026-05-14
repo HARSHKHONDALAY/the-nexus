@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
-
-function apiBaseUrl() {
-  const configured = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (configured) return configured;
-  if (process.env.NODE_ENV === "production") throw new Error("API_BASE_URL must be configured in production.");
-  return "http://localhost:8080/api";
-}
+import { getApiBaseUrl } from "@/lib/config/api";
 
 export async function POST(request: Request) {
   try {
-    const response = await fetch(`${apiBaseUrl()}/payments/razorpay/orders`, {
+    const response = await fetch(`${getApiBaseUrl()}/payments/razorpay/orders`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(await request.json()),

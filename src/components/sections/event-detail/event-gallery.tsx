@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 
 import SectionWrapper from "@/components/layout/section-wrapper";
 import { getEventMedia } from "@/lib/event-media";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
+import type { ImageAsset } from "@/data/eventAssetTypes";
 
 interface EventGalleryProps {
   event: EventData;
@@ -34,7 +35,7 @@ export default function EventGallery({ event }: EventGalleryProps) {
       </div>
 
       <div className="grid auto-rows-[220px] gap-4 md:auto-rows-[260px] md:grid-cols-12 md:gap-5">
-        {gallery.length > 0 ? gallery.map((item, index) => (
+        {gallery.length > 0 ? gallery.map((item: ImageAsset, index: number) => (
           <motion.article
             key={item.label}
             initial={{ opacity: 0, y: 24 }}
@@ -61,7 +62,7 @@ export default function EventGallery({ event }: EventGalleryProps) {
               </p>
             </div>
           </motion.article>
-        )) :event.gallery.map((item: any, index: number) => (
+        )) :event.gallery.map((item: string, index: number) => (
           <motion.article
             key={item}
             initial={{ opacity: 0, y: 24 }}

@@ -7,7 +7,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/shared/button";
 import { getEventCardImage } from "@/lib/event-media";
-type EventData = any;
+import type { EventData } from "@/lib/api/event-mappers";
 
 interface EventCardProps {
   event: EventData;
@@ -18,10 +18,10 @@ export default function EventCard({ event }: EventCardProps) {
   const thumbnail = (() => {
     try {
       const img = getEventCardImage(event);
-      return img || { src: "/events/default-thumbnail.jpg", alt: event.title || "Event" };
+      return img || { src: "/events/default-thumbnail.jpg", alt: event.title || "Event", width: 400, height: 300 };
     } catch (error) {
       console.error('Failed to get event card image:', error);
-      return { src: "/events/default-thumbnail.jpg", alt: event.title || "Event" };
+      return { src: "/events/default-thumbnail.jpg", alt: event.title || "Event", width: 400, height: 300 };
     }
   })();
 
@@ -35,9 +35,10 @@ export default function EventCard({ event }: EventCardProps) {
         <Image
           src={thumbnail?.src ?? "/events/default-thumbnail.jpg"}
           alt={thumbnail?.alt ?? event.title ?? "Event"}
-          fill
+          width={thumbnail?.width ?? 400}
+          height={thumbnail?.height ?? 300}
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover object-center transition duration-1000 ease-out group-hover:scale-[1.03] group-hover:opacity-95"
+          className="object-cover object-center transition duration-1000 ease-out group-hover:scale-[1.03] group-hover:opacity-95 w-full h-full"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/80" />

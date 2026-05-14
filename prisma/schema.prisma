@@ -7,209 +7,445 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum EventStatus {
-  DRAFT
-  PUBLISHED
-  LIVE
-  CLOSED
-  PAST
-  ARCHIVED
+model admin_permission_grants {
+  id                                                 String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  admin_user_id                                      String      @db.Uuid
+  permission_id                                      String      @db.Uuid
+  granted                                            Boolean     @default(true)
+  assigned_by                                        String?     @db.Uuid
+  reason                                             String?     @db.VarChar(500)
+  created_at                                         DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at                                         DateTime    @default(now()) @db.Timestamptz(6)
+  users_admin_permission_grants_admin_user_idTousers users       @relation("admin_permission_grants_admin_user_idTousers", fields: [admin_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_admin_permission_grants_assigned_byTousers   users?      @relation("admin_permission_grants_assigned_byTousers", fields: [assigned_by], references: [id], onUpdate: NoAction)
+  permissions                                        permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([admin_user_id, permission_id], map: "uk_admin_permission_grants")
+  @@index([admin_user_id], map: "idx_admin_permission_grants_admin")
 }
 
-enum RegistrationStatus {
-  SUBMITTED
-  CONFIRMED
-  CANCELLED
-  WAITLISTED
+model auth_audit_events {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?  @db.Uuid
+  event_type String   @db.VarChar(80)
+  ip_address String?  @db.VarChar(80)
+  user_agent String?  @db.VarChar(500)
+  metadata   Json?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users?   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_auth_audit_events_created")
+  @@index([event_type], map: "idx_auth_audit_events_type")
+  @@index([user_id], map: "idx_auth_audit_events_user")
 }
 
-enum PaymentStatus {
-  PENDING
-  VERIFIED
-  REJECTED
-  REFUNDED
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model bookings {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  booking_reference    String                 @unique(map: "uk_bookings_reference") @db.VarChar(40)
+  user_id              String?                @db.Uuid
+  event_id             String                 @db.Uuid
+  ticket_tier_id       String                 @db.Uuid
+  attendee_name        String                 @db.VarChar(160)
+  attendee_email       String                 @db.VarChar(320)
+  attendee_phone       String?                @db.VarChar(40)
+  quantity             Int
+  amount_paise         BigInt
+  currency             String                 @default("INR") @db.VarChar(8)
+  status               String                 @default("PENDING_PAYMENT") @db.VarChar(32)
+  payment_deadline_at  DateTime?              @db.Timestamptz(6)
+  confirmed_at         DateTime?              @db.Timestamptz(6)
+  cancelled_at         DateTime?              @db.Timestamptz(6)
+  cancellation_reason  String?                @db.VarChar(600)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @default(now()) @db.Timestamptz(6)
+  source_type          String                 @default("website") @db.VarChar(40)
+  instagram_id         String?                @db.VarChar(120)
+  attendee_age         Int?
+  attendee_location    String?                @db.VarChar(160)
+  occupation           String?                @db.VarChar(160)
+  payment_method       String?                @db.VarChar(80)
+  notes                String?                @db.VarChar(1000)
+  walk_in              Boolean                @default(false)
+  platform_events      platform_events        @relation(fields: [event_id], references: [id], onUpdate: NoAction)
+  ticket_tiers         ticket_tiers           @relation(fields: [ticket_tier_id], references: [id], onUpdate: NoAction)
+  users                users?                 @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  payment_transactions payment_transactions[]
+  tickets              tickets[]
+
+  @@index([attendee_name], map: "idx_bookings_attendee_name")
+  @@index([event_id], map: "idx_bookings_event")
+  @@index([event_id, source_type], map: "idx_bookings_event_source")
+  @@index([payment_deadline_at], map: "idx_bookings_payment_deadline")
+  @@index([status], map: "idx_bookings_status")
+  @@index([user_id], map: "idx_bookings_user")
 }
 
-enum CheckInStatus {
-  NOT_CHECKED_IN
-  CHECKED_IN
-  LATE
-  NO_SHOW
+model event_categories {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug            String            @unique(map: "uk_event_categories_slug") @db.VarChar(120)
+  name            String            @db.VarChar(160)
+  description     String?           @db.VarChar(800)
+  active          Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  platform_events platform_events[]
 }
 
-enum RegistrationSource {
-  WEBSITE
-  MANUAL
-  INSTAGRAM
-  PARTNER
-  BOOK_MY_SHOW
-  WALK_IN
-  IMPORTED
+model event_schedules {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String          @db.Uuid
+  title           String          @db.VarChar(220)
+  description     String?         @db.VarChar(1000)
+  starts_at       DateTime        @db.Timestamptz(6)
+  ends_at         DateTime?       @db.Timestamptz(6)
+  sort_order      Int             @default(0)
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  platform_events platform_events @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-enum ChessLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-  PROFESSIONAL
-  SPECTATOR
-  UNKNOWN
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model finance_entries {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String?          @db.Uuid
+  entry_type      String           @db.VarChar(40)
+  amount_paise    BigInt
+  note            String?          @db.VarChar(1000)
+  created_by      String?          @db.Uuid
+  deleted_at      DateTime?        @db.Timestamptz(6)
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime         @default(now()) @db.Timestamptz(6)
+  users           users?           @relation(fields: [created_by], references: [id], onUpdate: NoAction)
+  platform_events platform_events? @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([deleted_at], map: "idx_finance_entries_deleted")
+  @@index([event_id], map: "idx_finance_entries_event")
+  @@index([event_id, deleted_at], map: "idx_finance_entries_event_deleted")
+  @@index([entry_type], map: "idx_finance_entries_type")
 }
 
-enum FinanceAdjustmentSection {
-  REVENUE
-  VENUE_COST
-  EXPENSE
-  REFUND
-  OPERATIONS
-  DISCOUNT
+model flyway_schema_history {
+  installed_rank Int      @id(map: "flyway_schema_history_pk")
+  version        String?  @db.VarChar(50)
+  description    String   @db.VarChar(200)
+  type           String   @db.VarChar(20)
+  script         String   @db.VarChar(1000)
+  checksum       Int?
+  installed_by   String   @db.VarChar(100)
+  installed_on   DateTime @default(now()) @db.Timestamp(6)
+  execution_time Int
+  success        Boolean
+
+  @@index([success], map: "flyway_schema_history_s_idx")
 }
 
-enum FinanceAdjustmentOperator {
-  ADD
-  SUBTRACT
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model media_assets {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String?          @db.Uuid
+  uploaded_by     String?          @db.Uuid
+  media_type      String           @db.VarChar(32)
+  storage_key     String           @unique(map: "uk_media_assets_storage_key") @db.VarChar(1000)
+  public_url      String?          @db.VarChar(1000)
+  mime_type       String           @db.VarChar(160)
+  size_bytes      BigInt
+  status          String           @default("UPLOADED") @db.VarChar(32)
+  alt_text        String?          @db.VarChar(300)
+  sort_order      Int              @default(0)
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime         @default(now()) @db.Timestamptz(6)
+  platform_events platform_events? @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users?           @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction)
+
+  @@index([event_id], map: "idx_media_assets_event")
 }
 
-enum MediaType {
-  IMAGE
-  VIDEO
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model notification_jobs {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipient_email String    @db.VarChar(320)
+  template_key    String    @db.VarChar(120)
+  subject         String    @db.VarChar(240)
+  payload         Json
+  status          String    @default("QUEUED") @db.VarChar(32)
+  attempts        Int       @default(0)
+  last_error      String?   @db.VarChar(1000)
+  scheduled_at    DateTime  @default(now()) @db.Timestamptz(6)
+  sent_at         DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([status], map: "idx_notification_jobs_status")
 }
 
-enum MediaStatus {
-  DRAFT
-  CURATING
-  PUBLISHED
-  ARCHIVED
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model payment_transactions {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  booking_id          String   @db.Uuid
+  provider            String   @default("RAZORPAY") @db.VarChar(40)
+  provider_order_id   String   @unique(map: "uk_payment_transactions_order") @db.VarChar(120)
+  provider_payment_id String?  @db.VarChar(120)
+  provider_refund_id  String?  @db.VarChar(120)
+  amount_paise        BigInt
+  currency            String   @default("INR") @db.VarChar(8)
+  status              String   @default("ORDER_CREATED") @db.VarChar(40)
+  signature_verified  Boolean  @default(false)
+  idempotency_key     String   @unique(map: "uk_payment_transactions_idempotency") @db.VarChar(160)
+  raw_payload         Json?
+  failure_reason      String?  @db.VarChar(800)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @db.Timestamptz(6)
+  bookings            bookings @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([booking_id], map: "idx_payment_transactions_booking")
+  @@index([status], map: "idx_payment_transactions_status")
 }
 
-model Event {
-  id                 String              @id @default(cuid())
-  eventKey           String              @unique @map("event_key")
-  title              String
-  eventDate          DateTime            @map("event_date") @db.Date
-  dateLabel          String              @map("date_label")
-  timeLabel          String              @map("time_label")
-  venue              String
-  locationShort      String              @map("location_short")
-  price              Decimal             @default(600.00) @db.Decimal(12, 2)
-  venueCost          Decimal             @default(0.00) @map("venue_cost") @db.Decimal(12, 2)
-  maxSeats           Int                 @default(30) @map("max_seats")
-  upiId              String              @default("") @map("upi_id")
-  whatsappLink       String?             @map("whatsapp_link")
-  qrImage            String?             @map("qr_image")
-  logo               String?
-  status             EventStatus         @default(DRAFT)
-  registrationClosed Boolean             @default(false) @map("registration_closed")
-  archivedToPast     Boolean             @default(false) @map("archived_to_past")
-  isDeleted          Boolean             @default(false) @map("is_deleted")
-  deletedAt          DateTime?           @map("deleted_at")
-  createdAt          DateTime            @default(now()) @map("created_at")
-  updatedAt          DateTime            @updatedAt @map("updated_at")
-  registrations      Registration[]
-  financeAdjustments FinanceAdjustment[]
-  auditLogs          AuditLog[]
-  moments            MomentAsset[]
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model payment_webhook_events {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_event_id String    @unique(map: "uk_payment_webhook_events_provider_event") @db.VarChar(160)
+  event_type        String    @db.VarChar(80)
+  payload_hash      String    @db.VarChar(128)
+  status            String    @default("RECEIVED") @db.VarChar(32)
+  raw_payload       Json
+  error_message     String?   @db.VarChar(1000)
+  received_at       DateTime  @default(now()) @db.Timestamptz(6)
+  processed_at      DateTime? @db.Timestamptz(6)
 
-  @@index([eventDate])
-  @@index([status])
-  @@index([registrationClosed])
-  @@index([archivedToPast])
-  @@index([isDeleted])
-  @@map("events")
+  @@index([status], map: "idx_payment_webhook_events_status")
 }
 
-model Registration {
-  id                   String             @id @default(cuid())
-  eventId              String             @map("event_id")
-  event                Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  fullName             String             @map("full_name")
-  contactNumber        String             @map("contact_number")
-  email                String             @default("")
-  instagramId          String             @default("") @map("instagram_id")
-  age                  Int?
-  locationArea         String             @default("") @map("location_area")
-  occupation           String             @default("")
-  workingSector        String             @default("") @map("working_sector")
-  whatsappOptIn        Boolean            @default(false) @map("whatsapp_opt_in")
-  chessLevel           ChessLevel         @default(UNKNOWN) @map("chess_level")
-  dietaryPreference    String             @default("") @map("dietary_preference")
-  paymentScreenshotUrl String?            @map("payment_screenshot_url")
-  agreementAccepted    Boolean            @default(false) @map("agreement_accepted")
-  submittedAt          DateTime           @default(now()) @map("submitted_at")
-  checkInStatus        CheckInStatus      @default(NOT_CHECKED_IN) @map("check_in_status")
-  checkedInAt          DateTime?          @map("checked_in_at")
-  sourceType           RegistrationSource @default(WEBSITE) @map("source_type")
-  paymentStatus        PaymentStatus      @default(PENDING) @map("payment_status")
-  registrationStatus   RegistrationStatus @default(SUBMITTED) @map("registration_status")
-  attendeeNote         String?            @map("attendee_note")
-  eventTitleSnapshot   String             @default("") @map("event_title_snapshot")
-  eventDateSnapshot    DateTime?          @map("event_date_snapshot") @db.Date
-  eventTimeSnapshot    String             @default("") @map("event_time_snapshot")
-  eventVenueSnapshot   String             @default("") @map("event_venue_snapshot")
-  createdAt            DateTime           @default(now()) @map("created_at")
-  updatedAt            DateTime           @updatedAt @map("updated_at")
+model permissions {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                    String                    @unique(map: "uk_permissions_code") @db.VarChar(120)
+  module                  String                    @db.VarChar(80)
+  action                  String                    @db.VarChar(80)
+  description             String?                   @db.VarChar(500)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  admin_permission_grants admin_permission_grants[]
+  role_permissions        role_permissions[]
 
-  @@index([eventId])
-  @@index([contactNumber])
-  @@index([submittedAt])
-  @@index([checkInStatus])
-  @@index([sourceType])
-  @@index([paymentStatus])
-  @@index([registrationStatus])
-  @@unique([eventId, contactNumber])
-  @@map("registrations")
+  @@index([module], map: "idx_permissions_module")
 }
 
-model FinanceAdjustment {
-  id                String                    @id @default(cuid())
-  eventId           String                    @map("event_id")
-  event             Event                     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  section           FinanceAdjustmentSection  @default(EXPENSE)
-  operator          FinanceAdjustmentOperator @default(ADD)
-  amount            Decimal                   @default(0.00) @db.Decimal(12, 2)
-  comment           String?
-  createdBy         String?                   @map("created_by")
-  createdAt         DateTime                  @default(now()) @map("created_at")
-  updatedAt         DateTime                  @updatedAt @map("updated_at")
+model platform_audit_logs {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actor_user_id  String?  @db.Uuid
+  entity_type    String   @db.VarChar(100)
+  entity_id      String?  @db.Uuid
+  action         String   @db.VarChar(120)
+  metadata       String?
+  ip_address     String?  @db.VarChar(80)
+  user_agent     String?  @db.VarChar(500)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  ecosystem_slug String?  @db.VarChar(120)
+  users          users?   @relation(fields: [actor_user_id], references: [id], onUpdate: NoAction)
 
-  @@index([eventId])
-  @@index([section])
-  @@index([createdAt])
-  @@map("finance_adjustments")
+  @@index([ecosystem_slug, created_at(sort: Desc)], map: "idx_platform_audit_logs_ecosystem_created")
+  @@index([entity_type, entity_id], map: "idx_platform_audit_logs_entity")
 }
 
-model AuditLog {
-  id          String   @id @default(cuid())
-  eventId     String?  @map("event_id")
-  event       Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  userId      String?  @map("user_id")
-  actionKey   String   @map("action_key")
-  actionLabel String   @map("action_label")
-  details     String?
-  metadata    Json?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model platform_events {
+  id                                      String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category_id                             String            @db.Uuid
+  slug                                    String            @unique(map: "uk_platform_events_slug") @db.VarChar(160)
+  title                                   String            @db.VarChar(220)
+  subtitle                                String?           @db.VarChar(260)
+  description                             String
+  status                                  String            @default("DRAFT") @db.VarChar(32)
+  venue_name                              String            @db.VarChar(220)
+  venue_address                           String?           @db.VarChar(600)
+  city                                    String            @db.VarChar(120)
+  starts_at                               DateTime          @db.Timestamptz(6)
+  ends_at                                 DateTime          @db.Timestamptz(6)
+  timezone                                String            @default("Asia/Kolkata") @db.VarChar(80)
+  banner_url                              String?           @db.VarChar(1000)
+  hero_media_url                          String?           @db.VarChar(1000)
+  capacity                                Int
+  waitlist_enabled                        Boolean           @default(true)
+  published_at                            DateTime?         @db.Timestamptz(6)
+  created_by                              String?           @db.Uuid
+  updated_by                              String?           @db.Uuid
+  deleted_at                              DateTime?         @db.Timestamptz(6)
+  created_at                              DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at                              DateTime          @default(now()) @db.Timestamptz(6)
+  registration_open                       Boolean           @default(true)
+  allow_walk_ins                          Boolean           @default(true)
+  visibility                              String            @default("PUBLIC") @db.VarChar(32)
+  seo_title                               String?           @db.VarChar(220)
+  seo_description                         String?           @db.VarChar(320)
+  venue_cost_paise                        BigInt            @default(0)
+  bookings                                bookings[]
+  event_schedules                         event_schedules[]
+  finance_entries                         finance_entries[]
+  media_assets                            media_assets[]
+  event_categories                        event_categories  @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+  users_platform_events_created_byTousers users?            @relation("platform_events_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction)
+  users_platform_events_updated_byTousers users?            @relation("platform_events_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction)
+  ticket_tiers                            ticket_tiers[]
 
-  @@index([eventId])
-  @@index([actionKey])
-  @@index([createdAt])
-  @@map("audit_logs")
+  @@index([category_id], map: "idx_platform_events_category")
+  @@index([registration_open], map: "idx_platform_events_registration_open")
+  @@index([starts_at], map: "idx_platform_events_starts_at")
+  @@index([status], map: "idx_platform_events_status")
 }
 
-model MomentAsset {
-  id          String      @id @default(cuid())
-  eventId     String      @map("event_id")
-  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  title       String
-  type        MediaType
-  url         String
-  status      MediaStatus @default(DRAFT)
-  capturedAt  DateTime?   @map("captured_at")
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+model refresh_tokens {
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id              String           @db.Uuid
+  token_hash           String           @unique(map: "uk_refresh_tokens_token_hash") @db.VarChar(128)
+  family_id            String           @db.Uuid
+  expires_at           DateTime         @db.Timestamptz(6)
+  revoked_at           DateTime?        @db.Timestamptz(6)
+  replaced_by_token_id String?          @db.Uuid
+  ip_address           String?          @db.VarChar(80)
+  user_agent           String?          @db.VarChar(500)
+  created_at           DateTime         @default(now()) @db.Timestamptz(6)
+  refresh_tokens       refresh_tokens?  @relation("refresh_tokensTorefresh_tokens", fields: [replaced_by_token_id], references: [id], onUpdate: NoAction, map: "fk_refresh_tokens_replacement")
+  other_refresh_tokens refresh_tokens[] @relation("refresh_tokensTorefresh_tokens")
+  users                users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([eventId])
-  @@index([status])
-  @@index([capturedAt])
-  @@map("moment_assets")
+  @@index([expires_at], map: "idx_refresh_tokens_expires")
+  @@index([family_id], map: "idx_refresh_tokens_family")
+  @@index([user_id], map: "idx_refresh_tokens_user")
+}
+
+model role_permissions {
+  role_id       String      @db.Uuid
+  permission_id String      @db.Uuid
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([role_id, permission_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model roles {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String             @unique(map: "uk_roles_code") @db.VarChar(64)
+  display_name     String             @db.VarChar(120)
+  description      String?            @db.VarChar(500)
+  hierarchy_rank   Int
+  system_role      Boolean            @default(false)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  role_permissions role_permissions[]
+  user_roles       user_roles[]
+}
+
+model ticket_scans {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticket_id     String?  @db.Uuid
+  qr_token_hash String?  @db.VarChar(128)
+  result        String   @db.VarChar(40)
+  reason        String?  @db.VarChar(600)
+  scanned_by    String?  @db.Uuid
+  ip_address    String?  @db.VarChar(80)
+  user_agent    String?  @db.VarChar(500)
+  scanned_at    DateTime @default(now()) @db.Timestamptz(6)
+  users         users?   @relation(fields: [scanned_by], references: [id], onUpdate: NoAction)
+  tickets       tickets? @relation(fields: [ticket_id], references: [id], onUpdate: NoAction)
+
+  @@index([qr_token_hash], map: "idx_ticket_scans_hash")
+  @@index([ticket_id], map: "idx_ticket_scans_ticket")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ticket_tiers {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String          @db.Uuid
+  name            String          @db.VarChar(160)
+  description     String?         @db.VarChar(800)
+  price_paise     BigInt
+  currency        String          @default("INR") @db.VarChar(8)
+  capacity        Int
+  sold_count      Int             @default(0)
+  reserved_count  Int             @default(0)
+  sales_start_at  DateTime?       @db.Timestamptz(6)
+  sales_end_at    DateTime?       @db.Timestamptz(6)
+  active          Boolean         @default(true)
+  sort_order      Int             @default(0)
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime        @default(now()) @db.Timestamptz(6)
+  bookings        bookings[]
+  platform_events platform_events @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([event_id], map: "idx_ticket_tiers_event")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tickets {
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  booking_id          String         @db.Uuid
+  ticket_code         String         @unique(map: "uk_tickets_code") @db.VarChar(64)
+  qr_token_hash       String         @unique(map: "uk_tickets_qr_token_hash") @db.VarChar(128)
+  attendee_name       String         @db.VarChar(160)
+  status              String         @default("ACTIVE") @db.VarChar(32)
+  checked_in_at       DateTime?      @db.Timestamptz(6)
+  checked_in_by       String?        @db.Uuid
+  created_at          DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime       @default(now()) @db.Timestamptz(6)
+  qr_token_ciphertext String
+  ticket_scans        ticket_scans[]
+  bookings            bookings       @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               users?         @relation(fields: [checked_in_by], references: [id], onUpdate: NoAction)
+
+  @@index([booking_id], map: "idx_tickets_booking")
+}
+
+model user_roles {
+  user_id                             String   @db.Uuid
+  role_id                             String   @db.Uuid
+  assigned_by                         String?  @db.Uuid
+  assigned_at                         DateTime @default(now()) @db.Timestamptz(6)
+  users_user_roles_assigned_byTousers users?   @relation("user_roles_assigned_byTousers", fields: [assigned_by], references: [id], onUpdate: NoAction)
+  roles                               roles    @relation(fields: [role_id], references: [id], onUpdate: NoAction)
+  users_user_roles_user_idTousers     users    @relation("user_roles_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "idx_user_roles_role_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id                                                                   String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                                                                String                    @db.VarChar(320)
+  normalized_email                                                     String                    @unique(map: "uk_users_normalized_email") @db.VarChar(320)
+  password_hash                                                        String                    @db.VarChar(255)
+  full_name                                                            String                    @db.VarChar(160)
+  phone_number                                                         String?                   @db.VarChar(40)
+  status                                                               String                    @default("ACTIVE") @db.VarChar(32)
+  email_verified                                                       Boolean                   @default(false)
+  last_login_at                                                        DateTime?                 @db.Timestamptz(6)
+  password_changed_at                                                  DateTime?                 @db.Timestamptz(6)
+  disabled_at                                                          DateTime?                 @db.Timestamptz(6)
+  disabled_reason                                                      String?                   @db.VarChar(500)
+  created_at                                                           DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                                                           DateTime                  @default(now()) @db.Timestamptz(6)
+  admin_type                                                           String?                   @db.VarChar(64)
+  assigned_ecosystem_slug                                              String?                   @db.VarChar(120)
+  username                                                             String?                   @db.VarChar(80)
+  normalized_username                                                  String?                   @db.VarChar(80)
+  admin_permission_grants_admin_permission_grants_admin_user_idTousers admin_permission_grants[] @relation("admin_permission_grants_admin_user_idTousers")
+  admin_permission_grants_admin_permission_grants_assigned_byTousers   admin_permission_grants[] @relation("admin_permission_grants_assigned_byTousers")
+  auth_audit_events                                                    auth_audit_events[]
+  bookings                                                             bookings[]
+  finance_entries                                                      finance_entries[]
+  media_assets                                                         media_assets[]
+  platform_audit_logs                                                  platform_audit_logs[]
+  platform_events_platform_events_created_byTousers                    platform_events[]         @relation("platform_events_created_byTousers")
+  platform_events_platform_events_updated_byTousers                    platform_events[]         @relation("platform_events_updated_byTousers")
+  refresh_tokens                                                       refresh_tokens[]
+  ticket_scans                                                         ticket_scans[]
+  tickets                                                              tickets[]
+  user_roles_user_roles_assigned_byTousers                             user_roles[]              @relation("user_roles_assigned_byTousers")
+  user_roles_user_roles_user_idTousers                                 user_roles[]              @relation("user_roles_user_idTousers")
+
+  @@index([admin_type], map: "idx_users_admin_type")
+  @@index([assigned_ecosystem_slug], map: "idx_users_assigned_ecosystem")
+  @@index([created_at], map: "idx_users_created_at")
+  @@index([status], map: "idx_users_status")
 }

@@ -1,4 +1,4 @@
-import type { CheckInStatus, EventStatus, PaymentStatus, RegistrationSource, RegistrationStatus } from "@prisma/client";
+import type { EventStatus, BookingStatus, TicketStatus, BookingSource } from "@/lib/types/prisma-enums";
 
 export interface EventListFilters {
   status?: EventStatus;
@@ -8,15 +8,15 @@ export interface EventListFilters {
 
 export interface AttendeeListFilters {
   eventId?: string;
-  sourceType?: RegistrationSource;
-  paymentStatus?: PaymentStatus;
-  checkInStatus?: CheckInStatus;
+  source_type?: BookingSource;
+  status?: BookingStatus;
+  ticket_status?: TicketStatus;
   query?: string;
 }
 
 export interface EventOperationalSummary {
   eventId: string;
-  registrations: number;
+  bookings: number;
   verifiedPayments: number;
   checkedIn: number;
   occupancyPercent: number;
@@ -31,9 +31,9 @@ export interface BulkAttendeeOperationResult {
   skipped: number;
 }
 
-export interface RegistrationStateTransition {
-  registrationId: string;
-  from: RegistrationStatus;
-  to: RegistrationStatus;
+export interface BookingStateTransition {
+  bookingId: string;
+  from: BookingStatus;
+  to: BookingStatus;
   reason?: string;
 }

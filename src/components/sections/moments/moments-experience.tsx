@@ -13,7 +13,7 @@ import { Button } from "@/components/shared/button";
 import { artAssets } from "@/data/artAssets";
 import { chessAssets } from "@/data/chessAssets";
 import type { ImageAsset } from "@/data/eventAssetTypes";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 import defaultOgImage from "@/../public/branding/og-image.png";
 
 interface MomentsExperienceProps {
@@ -222,7 +222,7 @@ export default function MomentsExperience({ featuredEvent }: MomentsExperiencePr
             <motion.div variants={reveal} className="mt-8 flex flex-wrap gap-3">
               <Magnetic className="inline-block" strength={0.16}>
                 <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
-                  <Link href={`/register/${featuredEvent.eventKey}`}>Be Part Of The Next Moment</Link>
+                  <Link href={featuredEvent?.eventKey ? `/register/${featuredEvent.eventKey}` : "/events"}>Register Now</Link>
                 </Button>
               </Magnetic>
               <Button asChild variant="secondary" size="roomy">
@@ -417,7 +417,7 @@ export default function MomentsExperience({ featuredEvent }: MomentsExperiencePr
             <div className="mt-9 flex justify-center">
               <Magnetic className="inline-block" strength={0.16}>
                 <Button asChild variant="primary" size="roomy" endIcon={<ArrowRight size={16} />}>
-                  <Link href={`/register/${featuredEvent.eventKey}`}>Book The Next Room</Link>
+                  <Link href={featuredEvent?.eventKey ? `/register/${featuredEvent.eventKey}` : "/events"}>Book The Next Room</Link>
                 </Button>
               </Magnetic>
             </div>

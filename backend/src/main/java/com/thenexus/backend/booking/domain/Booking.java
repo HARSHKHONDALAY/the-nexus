@@ -44,6 +44,8 @@ public class Booking {
   @Column(length = 160) private String occupation;
   @Column(length = 80) private String paymentMethod;
   @Column(length = 1000) private String notes;
+  @Column(nullable = false) private boolean privacyConsent;
+  @Column(nullable = false) private boolean mediaConsent;
   @Column(nullable = false) private boolean walkIn;
   @Column(nullable = false, updatable = false) private Instant createdAt = Instant.now();
   @Column(nullable = false) private Instant updatedAt = Instant.now();
@@ -116,4 +118,10 @@ public class Booking {
   public String getPaymentMethod() { return paymentMethod; }
   public String getNotes() { return notes; }
   public boolean isWalkIn() { return walkIn; }
+  
+  public boolean isPrivacyConsent() { return privacyConsent; }
+  public void setPrivacyConsent(boolean privacyConsent) { this.privacyConsent = privacyConsent; }
+  
+  public boolean isMediaConsent() { return mediaConsent; }
+  public void setMediaConsent(boolean mediaConsent) { this.mediaConsent = mediaConsent; }
 }

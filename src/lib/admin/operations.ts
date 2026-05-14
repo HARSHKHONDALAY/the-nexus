@@ -4,13 +4,13 @@ export type AdminEvent = {
   title: string;
   world: string;
   status: string;
-  registrationOpen: boolean;
-  allowWalkIns: boolean;
-  venueName: string;
-  venueAddress?: string | null;
+  registration_open: boolean;
+  allow_walk_ins: boolean;
+  venue_name: string;
+  venue_address?: string | null;
   city: string;
-  startsAt: string;
-  endsAt: string;
+  starts_at: string;
+  ends_at: string;
   capacity: number;
   ticketPricePaise: number;
   venueCostPaise: number;
@@ -19,8 +19,8 @@ export type AdminEvent = {
   revenuePaise: number;
   expensePaise: number;
   profitPaise: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Attendee = {
@@ -35,14 +35,14 @@ export type Attendee = {
   source: string;
   instagram?: string | null;
   age?: number | null;
-  location?: string | null;
-  occupation?: string | null;
+  privacyConsent: boolean;
+  mediaConsent: boolean;
   paymentMethod?: string | null;
   amountPaidPaise: number;
   bookingStatus: string;
   checkInStatus: string;
   checkedInAt?: string | null;
-  registrationTime: string;
+  registration_time: string;
   notes?: string | null;
 };
 
@@ -53,7 +53,7 @@ export type AuditLog = {
   entityId?: string | null;
   action: string;
   metadata?: string | null;
-  createdAt: string;
+  created_at: string;
 };
 
 export type Dashboard = {
@@ -78,8 +78,8 @@ export type FinanceEntry = {
   entryType: string;
   amountPaise: number;
   note?: string | null;
-  createdBy: string;
-  createdAt: string;
+  created_by: string;
+  created_at: string;
 };
 
 export type FinanceSummary = {
@@ -140,7 +140,12 @@ export function formatMoney(paise: number) {
 }
 
 export function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  const date = new Date(value);
+  // Check if the date is valid
+  if (!isFinite(date.getTime())) {
+    return "Invalid Date";
+  }
+  return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
 function normalizePath(path: string) {

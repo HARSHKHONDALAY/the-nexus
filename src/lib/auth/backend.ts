@@ -2,14 +2,7 @@ import { cookies } from "next/headers";
 import { ACCESS_TOKEN_COOKIE } from "./cookies";
 import type { ApiEnvelope } from "./types";
 
-function apiBaseUrl() {
-  const configured = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (configured) return configured;
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("API_BASE_URL must be configured in production.");
-  }
-  return "http://localhost:8080/api";
-}
+import { getApiBaseUrl } from "@/lib/config/api";
 
 export async function backendFetch<T>(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
@@ -23,13 +16,13 @@ export async function backendFetch<T>(path: string, init: RequestInit = {}) {
 
   let response: Response;
   try {
-    response = await fetch(`${apiBaseUrl()}${path}`, {
+    response = await fetch(`${getApiBaseUrl()}${path}`, {
       ...init,
       headers,
       cache: "no-store",
     });
   } catch {
-    throw new Error(`${method} ${path} could not reach the backend at ${apiBaseUrl()}.`);
+    throw new Error(`${method} ${path} could not reach the backend at ${getApiBaseUrl()}.`);
   }
 
   const text = await response.text();

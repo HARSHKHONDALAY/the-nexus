@@ -10,14 +10,13 @@ import Magnetic from "@/components/interactions/magnetic";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import SectionHeading from "@/components/shared/section-heading";
 import { Button } from "@/components/shared/button";
-import { getFeaturedEvents } from "@/lib/api/events";
+import { getFeaturedEvents } from "@/lib/api/events-safe";
 import { mapPlatformEventsToEventData } from "@/lib/api/event-mappers";
-
-type EventData = any;
+import type { EventData } from "@/lib/api/event-mappers";
 
 export default function FeaturedExperiences() {
   const [featuredExperiences, setFeaturedExperiences] =
-    useState<any[]>([]);
+    useState<EventData[]>([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -124,13 +123,15 @@ export default function FeaturedExperiences() {
       <div className="mt-12 grid gap-4 md:mt-14 md:grid-cols-3 md:gap-5">
         {featuredExperiences.map(
           (
-            item: any,
+            item: EventData,
             index: number
           ) => {
             const thumbnail = {
               src: "/events/default-thumbnail.jpg",
               alt:
                 item.title || "Event",
+              width: 1200,
+              height: 800,
             };
 
             return (
@@ -165,9 +166,10 @@ export default function FeaturedExperiences() {
                   <Image
                     src={thumbnail.src}
                     alt={thumbnail.alt}
-                    fill
+                    width={thumbnail.width}
+                    height={thumbnail.height}
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover object-center opacity-90 transition duration-1000 group-hover:scale-[1.03]"
+                    className="object-cover object-center opacity-90 transition duration-1000 group-hover:scale-[1.03] w-full h-full"
                   />
 
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/15 to-black/85" />

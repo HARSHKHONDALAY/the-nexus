@@ -207,11 +207,7 @@ export const PerformanceOptimizedCanvas: React.FC<PerformanceOptimizedCanvasProp
   onPerformanceChange,
   enablePerformanceMonitoring = true
 }) => {
-  const [isClient, setIsClient] = useState(false);
-  
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = typeof window !== "undefined";
   
   if (!isClient) {
     return fallback || (

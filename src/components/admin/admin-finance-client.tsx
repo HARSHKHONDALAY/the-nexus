@@ -37,9 +37,9 @@ export default function AdminFinanceClient() {
       await adminApi("/finance/entries", {
         method: "POST",
         body: JSON.stringify({
-          eventId: entry.eventId || null,
-          entryType: entry.entryType,
-          amountPaise: Math.round(Number(entry.amount) * 100),
+          event_id: entry.eventId || null,
+          entry_type: entry.entryType,
+          amount_paise: Math.round(Number(entry.amount) * 100),
           note: entry.note,
         }),
       });
@@ -82,7 +82,7 @@ export default function AdminFinanceClient() {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <h3 className="text-xl font-semibold text-lime-50">{event.title}</h3>
-                        <p className="mt-1 text-sm text-lime-100/48">{event.venueName}</p>
+                        <p className="mt-1 text-sm text-lime-100/48">{event.venue_name}</p>
                       </div>
                       <StatusChip tone={event.profitPaise >= 0 ? "lime" : "red"}>{formatMoney(event.profitPaise)} profit</StatusChip>
                     </div>
@@ -123,8 +123,8 @@ export default function AdminFinanceClient() {
                   <StatusChip key="type" tone={item.entryType === "REVENUE" ? "lime" : item.entryType === "REFUND" ? "red" : "amber"}>{item.entryType}</StatusChip>,
                   <span key="event">{item.eventTitle}</span>,
                   <span key="amount">{formatMoney(item.amountPaise)}</span>,
-                  <span key="operator">{item.createdBy}</span>,
-                  <span key="time">{formatDateTime(item.createdAt)}</span>,
+                  <span key="operator">{item.created_by}</span>,
+                  <span key="time">{formatDateTime(item.created_at)}</span>,
                   <span key="note" className="text-lime-100/58">{item.note || "-"}</span>,
                   <AdminButton key="delete" variant="ghost" onClick={() => remove(item.id)}>Delete</AdminButton>,
                 ])}

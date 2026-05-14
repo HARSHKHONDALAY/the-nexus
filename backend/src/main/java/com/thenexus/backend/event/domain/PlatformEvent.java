@@ -24,7 +24,7 @@ public class PlatformEvent {
   @UuidGenerator
   private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "category_id")
   private EventCategory category;
 
@@ -186,6 +186,7 @@ private Instant deletedAt;
 
   public void publish(User actor) {
     status = EventStatus.PUBLISHED;
+    registrationOpen = true;
     publishedAt = Instant.now();
     updatedBy = actor;
   }

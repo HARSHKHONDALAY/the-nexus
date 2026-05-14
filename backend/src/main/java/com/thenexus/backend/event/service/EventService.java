@@ -1,14 +1,15 @@
 package com.thenexus.backend.event.service;
 
 import com.thenexus.backend.common.exception.ApiException;
+import com.thenexus.backend.event.dto.CreateEventRequest;
+import com.thenexus.backend.event.dto.EventResponse;
+import com.thenexus.backend.event.dto.CreateTicketTierRequest;
+import com.thenexus.backend.event.dto.TicketTierResponse;
+import com.thenexus.backend.event.dto.PublicEventWithTiersResponse;
 import com.thenexus.backend.event.domain.EventCategory;
 import com.thenexus.backend.event.domain.EventStatus;
 import com.thenexus.backend.event.domain.PlatformEvent;
 import com.thenexus.backend.event.domain.TicketTier;
-import com.thenexus.backend.event.dto.CreateEventRequest;
-import com.thenexus.backend.event.dto.CreateTicketTierRequest;
-import com.thenexus.backend.event.dto.EventResponse;
-import com.thenexus.backend.event.dto.TicketTierResponse;
 import com.thenexus.backend.event.repository.EventCategoryRepository;
 import com.thenexus.backend.event.repository.PlatformEventRepository;
 import com.thenexus.backend.event.repository.TicketTierRepository;
@@ -19,8 +20,8 @@ import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +64,7 @@ public class EventService {
 
   public EventResponse publicEventBySlug(String slug) {
     try {
-      PlatformEvent event = eventRepository.findBySlug(slug)
+      PlatformEvent event = eventRepository.findBySlugWithCategory(slug)
           .filter(found -> found.getStatus() == EventStatus.PUBLISHED || found.getStatus() == EventStatus.LIVE || found.getStatus() == EventStatus.SOLD_OUT)
           .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Event not found."));
       
@@ -81,6 +82,41 @@ public class EventService {
       }
       
       return EventResponse.from(event);
+    } catch (ApiException e) {
+      throw e; // Re-throw API exceptions
+    } catch (Exception e) {
+      log.error("Error fetching event by slug: {}", slug, e);
+      throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to fetch event: " + e.getMessage());
+    }
+  }
+
+  public PublicEventWithTiersResponse publicEventWithTiersBySlug(String slug) {
+    try {
+      // Use the event repository method with category to avoid lazy loading issues
+      PlatformEvent event = eventRepository.findBySlugWithCategory(slug)
+          .filter(found -> found.getStatus() == EventStatus.PUBLISHED || found.getStatus() == EventStatus.LIVE || found.getStatus() == EventStatus.SOLD_OUT)
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Event not found."));
+      
+      // Validate event data before processing
+      if (event.getId() == null) {
+        throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Event has invalid ID");
+      }
+      
+      if (event.getTitle() == null || event.getTitle().trim().isEmpty()) {
+        throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Event has invalid title");
+      }
+      
+      if (event.getSlug() == null || event.getSlug().trim().isEmpty()) {
+        throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Event has invalid slug");
+      }
+      
+      // Get ticket tiers for this event
+      log.info("Loading ticket tiers for event: {}", event.getId());
+      List<TicketTier> tiers = ticketTierRepository.findByEventIdOrderBySortOrderAsc(event.getId());
+      log.info("Found {} ticket tiers for event: {}", tiers.size(), event.getId());
+      
+      // Create response with basic event data (no category to avoid lazy loading)
+      return PublicEventWithTiersResponse.from(event, tiers);
     } catch (ApiException e) {
       throw e; // Re-throw API exceptions
     } catch (Exception e) {

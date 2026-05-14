@@ -1,16 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { getApiBaseUrl } from "@/lib/config/api";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/auth/cookies";
 
-function apiBaseUrl() {
-  const configured = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (configured) return configured;
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("API_BASE_URL must be configured in production.");
-  }
-  return "http://localhost:8080/api";
-}
 
 async function parseBackendPayload(response: Response) {
   const text = await response.text();
@@ -39,7 +32,7 @@ async function proxy(request: Request, params: Promise<{ path: string[] }>) {
 
   const path = (await params).path.join("/");
   const sourceUrl = new URL(request.url);
-  const target = `${apiBaseUrl()}/${path}${sourceUrl.search}`;
+  const target = `${getApiBaseUrl()}/${path}${sourceUrl.search}`;
   
   // Preserve FormData body - don't convert to text
   const contentType = request.headers.get("Content-Type");

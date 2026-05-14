@@ -23,7 +23,7 @@ import FloatingTicketCta from "@/components/conversion/floating-ticket-cta";
 import {
   getEventBySlug as getEventBySlugFromApi,
   getUpcomingEvents,
-} from "@/lib/api/events";
+} from "@/lib/api/events-safe";
 
 import {
   mapPlatformEventToEventData,
@@ -87,73 +87,72 @@ export default async function EventPage({
 }: EventPageProps) {
   const { slug } = await params;
 
+  // Data fetching - this can be wrapped in try/catch
+  let platformEvent;
+  let upcomingEvents = [];
+
   try {
-    const platformEvent =
-      await getEventBySlugFromApi(slug);
-
-    if (!platformEvent) {
-      notFound();
-    }
-
-    const event =
-      mapPlatformEventToEventData(platformEvent);
-
-    const upcomingEvents =
-      await getUpcomingEvents();
-
-    const relatedEvents =
-      mapPlatformEventsToEventData(
-        upcomingEvents
-          .filter((e) => e.slug !== slug)
-          .slice(0, 3)
-      );
-
-    return (
-      <>
-        <Navbar />
-
-        <main className="relative overflow-hidden">
-          <GlobalAtmosphere />
-
-          <EventHero event={event} />
-
-          <EventTicketCta event={event} />
-
-          <EventMetadata event={event} />
-
-          <EventDescription event={event} />
-
-          <EventCinematicVideo event={event} />
-
-          <EventPosterFeature event={event} />
-
-          <EventGallery event={event} />
-
-          <EventCommunityVibe event={event} />
-
-          <EventFlow event={event} />
-
-          <RegistrationSection event={event} />
-
-          <EventFaq event={event} />
-
-          <RelatedEvents
-            currentEvent={event}
-            relatedEvents={relatedEvents}
-          />
-        </main>
-
-        <FloatingTicketCta
-          event={event}
-          label="Reserve"
-        />
-
-        <FooterEcosystem />
-      </>
-    );
+    platformEvent = await getEventBySlugFromApi(slug);
+    upcomingEvents = await getUpcomingEvents();
   } catch (error) {
-    console.error(error);
-
+    console.error("Failed to fetch event data:", error);
     notFound();
   }
+
+  // Data validation - separate from JSX rendering
+  if (!platformEvent) {
+    notFound();
+  }
+
+  const event = mapPlatformEventToEventData(platformEvent);
+  const relatedEvents = mapPlatformEventsToEventData(
+    upcomingEvents
+      .filter((e) => e.slug !== slug)
+      .slice(0, 3)
+  );
+
+  // JSX rendering - no try/catch wrapper
+  return (
+    <>
+      <Navbar />
+
+      <main className="relative overflow-hidden">
+        <GlobalAtmosphere />
+
+        <EventHero event={event} />
+
+        <EventTicketCta event={event} />
+
+        <EventMetadata event={event} />
+
+        <EventDescription event={event} />
+
+        <EventCinematicVideo event={event} />
+
+        <EventPosterFeature event={event} />
+
+        <EventGallery event={event} />
+
+        <EventCommunityVibe event={event} />
+
+        <EventFlow event={event} />
+
+        <RegistrationSection event={event} />
+
+        <EventFaq event={event} />
+
+        <RelatedEvents
+          currentEvent={event}
+          relatedEvents={relatedEvents}
+        />
+      </main>
+
+      <FloatingTicketCta
+        event={event}
+        label="Reserve"
+      />
+
+      <FooterEcosystem featuredEvent={event} />
+    </>
+  );
 }

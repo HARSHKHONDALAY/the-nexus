@@ -10,7 +10,8 @@ import Magnetic from "@/components/interactions/magnetic";
 import { Button } from "@/components/shared/button";
 import TierCard from "@/components/sections/event-detail/registration/tier-card";
 
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
+import type { TicketTierData } from "@/lib/types/api";
 
 interface RegistrationSectionProps {
   event: EventData;
@@ -21,7 +22,7 @@ export default function RegistrationSection({
 }: RegistrationSectionProps) {
   const availableTiers =
     event.ticketTiers.filter(
-      (t: any) => t.status !== "sold_out"
+      (t: TicketTierData) => t.status !== "sold_out"
     );
 
   const [selectedTierId, setSelectedTierId] =
@@ -34,7 +35,7 @@ export default function RegistrationSection({
   const selectedTier = useMemo(
     () =>
       event.ticketTiers.find(
-        (t: any) => t.id === selectedTierId
+        (t: TicketTierData) => t.id === selectedTierId
       ),
     [event.ticketTiers, selectedTierId]
   );
@@ -80,7 +81,7 @@ export default function RegistrationSection({
         <div className="md:col-span-7">
           <div className="grid gap-4">
             {event.ticketTiers.map(
-              (tier: any) => (
+              (tier: TicketTierData) => (
                 <TierCard
                   key={tier.id}
                   tier={tier}

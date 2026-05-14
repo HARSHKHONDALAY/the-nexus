@@ -70,8 +70,10 @@ public class BookingService {
     tier.reserve(request.quantity());
     Booking booking = new Booking(referenceService.nextReference(), user, event, tier, request.attendeeName(), request.attendeeEmail(),
         request.attendeePhone(), request.quantity(), tier.getPricePaise() * request.quantity(), tier.getCurrency(), Instant.now().plusSeconds(900));
-    booking.updateOperationalDetails(request.sourceType(), request.instagramId(), request.attendeeAge(), request.attendeeLocation(),
-        request.occupation(), null, request.notes());
+    booking.updateOperationalDetails(request.sourceType(), request.instagramId(), request.attendeeAge(), null, null, null, request.notes());
+    // Set consent fields using proper setters
+    booking.setPrivacyConsent(request.privacyConsent());
+    booking.setMediaConsent(request.mediaConsent());
     return BookingResponse.from(bookingRepository.save(booking));
   }
 

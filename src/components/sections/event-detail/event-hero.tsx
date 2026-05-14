@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/shared/button";
 import { getPrimaryHeroImage } from "@/lib/event-media";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 
 interface EventHeroProps {
   event: EventData;

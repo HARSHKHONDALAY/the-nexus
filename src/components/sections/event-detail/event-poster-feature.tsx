@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import { Button } from "@/components/shared/button";
 import { getEventMedia } from "@/lib/event-media";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 
 interface EventPosterFeatureProps {
   event: EventData;

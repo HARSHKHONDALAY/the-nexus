@@ -48,7 +48,7 @@ public class PaymentService {
 
   @Transactional
   public PaymentOrderResponse createOrder(CreatePaymentOrderRequest request) {
-    Booking booking = bookingService.getBooking(request.bookingId());
+    Booking booking = bookingService.getBooking(request.getBookingId());
     ensurePayable(booking);
     String idempotencyKey = "razorpay-order-" + booking.getId();
     return transactionRepository.findByIdempotencyKey(idempotencyKey)

@@ -14,7 +14,17 @@ const DigitalNetworkScene = dynamic(() => import("@/components/sections/hero/dig
   loading: () => null,
 });
 
-export default function Hero() {
+interface HeroProps {
+  featuredEvent?: {
+    title?: string;
+    slug?: string;
+    dateLabel?: string;
+    price?: string;
+    venue?: string;
+  };
+}
+
+export default function Hero({ featuredEvent }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
@@ -96,7 +106,7 @@ export default function Hero() {
       {renderNetwork && !prefersReducedMotion ? <DigitalNetworkScene pointerX={pointerX} pointerY={pointerY} /> : null}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(2,8,23,0.62),transparent_24%,transparent_58%,rgba(2,8,23,0.94))]" />
       <div className="pointer-events-none absolute inset-0 opacity-[calc(var(--hero-scroll)*0.72)] backdrop-blur-[calc(var(--hero-scroll)*10px)]" />
-      <HeroContent />
+      <HeroContent event={featuredEvent} />
     </section>
   );
 }

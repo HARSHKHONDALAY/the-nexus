@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import Magnetic from "@/components/interactions/magnetic";
 import { Button } from "@/components/shared/button";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 import TierCard from "@/components/sections/event-detail/registration/tier-card";
 
 function Input({
@@ -52,8 +52,13 @@ interface RegisterFormProps {
   event: EventData;
 }
 
+import { getApiBaseUrl } from "@/lib/config/api";
+
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
+  const fullUrl = url.startsWith('http') ? url : `${getApiBaseUrl()}${url}`;
+  console.log(`🌐 Browser API request to: ${fullUrl}`);
+  
+  const response = await fetch(fullUrl, {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
@@ -90,24 +95,20 @@ export default function RegisterForm({ event }: RegisterFormProps) {
     attendeePhone: "",
     instagramId: "",
     attendeeAge: "",
-    attendeeLocation: "",
-    occupation: "",
-    quantity: 1,
+    privacyConsent: false,
+    mediaConsent: false,
   });
 
   const selectedTier = useMemo(
-    () => event.ticketTiers.find((tier: any) => tier.id === tierId),
-    [event.ticketTiers, tierId],
+    () => backendTiers.find((tier: BackendTier) => tier.id === tierId),
+    [backendTiers, tierId],
   );
 
-  const selectedBackendTier = useMemo(() => {
-    if (!selectedTier) return backendTiers[0];
-    return backendTiers.find((tier) => tier.name.toLowerCase() === selectedTier.name.toLowerCase()) ?? backendTiers[0];
-  }, [backendTiers, selectedTier]);
+  const selectedBackendTier = selectedTier;
 
   useEffect(() => {
     let alive = true;
-    api<{ event: BackendEvent; ticketTiers: BackendTier[] }>(`/api/public/events/${event.slug}`)
+    api<{ event: BackendEvent; ticketTiers: BackendTier[] }>(`/api/events/public/events/${event.slug}`)
       .then((payload) => {
         if (!alive) return;
         setBackendEvent(payload.event);
@@ -118,7 +119,10 @@ export default function RegisterForm({ event }: RegisterFormProps) {
       .catch((error) => {
         if (!alive) return;
         setStatus("failed");
-        setMessage(error instanceof Error ? error.message : "This event is not available for booking.");
+        // Show more detailed error information
+        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+        console.error("Event loading error:", error);
+        setMessage(`Failed to load event data: ${errorMessage}`);
       });
     return () => {
       alive = false;
@@ -127,15 +131,30 @@ export default function RegisterForm({ event }: RegisterFormProps) {
 
   async function submitBooking(submitEvent: React.FormEvent<HTMLFormElement>) {
     submitEvent.preventDefault();
+    
+    // Validate required fields and consent
+    if (!form.attendeeName || !form.attendeeEmail || !form.attendeePhone || !form.attendeeAge) {
+      setStatus("failed");
+      setMessage("Please fill in all required fields.");
+      return;
+    }
+    
+    if (!form.privacyConsent || !form.mediaConsent) {
+      setStatus("failed");
+      setMessage("Please accept both consent checkboxes to continue.");
+      return;
+    }
+    
     if (!backendEvent || !selectedBackendTier) {
       setStatus("failed");
       setMessage("Live ticket inventory is unavailable.");
       return;
     }
+    
     setStatus("submitting");
     setMessage("Creating a secure booking hold.");
     try {
-      const booking = await api<Booking>("/api/bookings", {
+      const booking = await api<Booking>("/api/public/bookings", {
         method: "POST",
         body: JSON.stringify({
           eventId: backendEvent.id,
@@ -145,10 +164,10 @@ export default function RegisterForm({ event }: RegisterFormProps) {
           attendeePhone: form.attendeePhone,
           instagramId: form.instagramId || null,
           attendeeAge: form.attendeeAge ? Number(form.attendeeAge) : null,
-          attendeeLocation: form.attendeeLocation || null,
-          occupation: form.occupation || null,
           sourceType: "website",
-          quantity: form.quantity,
+          quantity: 1, // Always 1 ticket per registration
+          privacyConsent: form.privacyConsent,
+          mediaConsent: form.mediaConsent,
         }),
       });
 
@@ -195,7 +214,9 @@ export default function RegisterForm({ event }: RegisterFormProps) {
       });
     } catch (error) {
       setStatus("failed");
-      setMessage(error instanceof Error ? error.message : "Booking could not be completed.");
+      const errorMessage = error instanceof Error ? error.message : "Booking could not be completed.";
+      console.error("Booking submission error:", error);
+      setMessage(`Booking failed: ${errorMessage}`);
     }
   }
 
@@ -204,7 +225,7 @@ export default function RegisterForm({ event }: RegisterFormProps) {
       <div className="grid gap-10 md:grid-cols-12 md:gap-12">
         <div className="md:col-span-6">
           <div className="grid gap-4">
-            {event.ticketTiers.map((tier: any) => (
+            {backendTiers.map((tier: BackendTier) => (
               <TierCard key={tier.id} tier={tier} selected={tier.id === tierId} onSelect={() => setTierId(tier.id)} />
             ))}
           </div>
@@ -219,28 +240,53 @@ export default function RegisterForm({ event }: RegisterFormProps) {
         >
           <p className="text-xs uppercase tracking-[0.3em] text-lime-100/50">Secure checkout</p>
           <p className="mt-3 text-sm text-lime-100/65">
-            Selected tier: <span className="text-lime-50">{selectedTier?.name}</span>
+            Selected tier: <span className="text-lime-50">{selectedTier?.name}</span> - <span className="text-lime-50">₹{selectedBackendTier ? (selectedBackendTier.pricePaise / 100).toFixed(2) : '0.00'}</span>
           </p>
 
-          <form onSubmit={submitBooking} className="mt-6 grid gap-4">
-            <div className="grid gap-3 md:grid-cols-2">
-              <Input label="Name" value={form.attendeeName} onChange={(attendeeName) => setForm((current) => ({ ...current, attendeeName }))} />
+          <form onSubmit={submitBooking} className="mt-6 space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input label="Full Name" value={form.attendeeName} onChange={(attendeeName) => setForm((current) => ({ ...current, attendeeName }))} />
               <Input label="Email" type="email" value={form.attendeeEmail} onChange={(attendeeEmail) => setForm((current) => ({ ...current, attendeeEmail }))} />
               <Input label="Phone" value={form.attendeePhone} onChange={(attendeePhone) => setForm((current) => ({ ...current, attendeePhone }))} />
-              <Input label="Instagram" required={false} value={form.instagramId} onChange={(instagramId) => setForm((current) => ({ ...current, instagramId }))} />
-              <Input label="Age" type="number" required={false} value={form.attendeeAge} onChange={(attendeeAge) => setForm((current) => ({ ...current, attendeeAge }))} />
-              <Input label="City" required={false} value={form.attendeeLocation} onChange={(attendeeLocation) => setForm((current) => ({ ...current, attendeeLocation }))} />
-              <Input label="Occupation" required={false} value={form.occupation} onChange={(occupation) => setForm((current) => ({ ...current, occupation }))} />
-              <label className="grid gap-2 text-xs uppercase tracking-[0.18em] text-lime-100/48">
-                Quantity
-                <input
-                  type="number"
-                  min={1}
-                  max={8}
-                  value={form.quantity}
-                  onChange={(inputEvent) => setForm((current) => ({ ...current, quantity: Number(inputEvent.target.value) }))}
-                  className="rounded-2xl border border-lime-200/12 bg-black/35 px-4 py-3 text-sm normal-case tracking-normal text-lime-50 outline-none"
+              <Input label="Age" type="number" value={form.attendeeAge} onChange={(attendeeAge) => setForm((current) => ({ ...current, attendeeAge }))} />
+              <div className="md:col-span-2">
+                <Input 
+                  label="Instagram (Optional)" 
+                  required={false} 
+                  value={form.instagramId} 
+                  onChange={(instagramId) => setForm((current) => ({ ...current, instagramId }))} 
                 />
+                <p className="mt-1 text-xs text-lime-100/40">Used for tagging/re-sharing event moments.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 border-t border-lime-200/10 pt-6">
+              <h4 className="text-sm font-medium text-lime-50">Consent & Agreement</h4>
+              
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={form.privacyConsent}
+                  onChange={(e) => setForm((current) => ({ ...current, privacyConsent: e.target.checked }))}
+                  className="mt-1 rounded border-lime-200/20 bg-black/30 text-lime-500 focus:ring-2 focus:ring-lime-500/20 focus:ring-offset-0"
+                  required
+                />
+                <span className="text-sm text-lime-100/70 leading-relaxed">
+                  I agree to The Nexus privacy policy and terms.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={form.mediaConsent}
+                  onChange={(e) => setForm((current) => ({ ...current, mediaConsent: e.target.checked }))}
+                  className="mt-1 rounded border-lime-200/20 bg-black/30 text-lime-500 focus:ring-2 focus:ring-lime-500/20 focus:ring-offset-0"
+                  required
+                />
+                <span className="text-sm text-lime-100/70 leading-relaxed">
+                  I understand this event may be photographed/filmed and I consent to being included in event media.
+                </span>
               </label>
             </div>
 

@@ -4,14 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 import SectionWrapper from "@/components/layout/section-wrapper";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 
 interface RelatedEventsProps {
-  currentEvent: EventData;
   relatedEvents?: EventData[];
 }
 
-export default function RelatedEvents({ currentEvent, relatedEvents }: RelatedEventsProps) {
+export default function RelatedEvents({ relatedEvents }: RelatedEventsProps) {
   // Use provided related events or fallback to empty array
   const related = relatedEvents || [];
 

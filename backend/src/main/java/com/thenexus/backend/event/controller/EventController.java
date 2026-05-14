@@ -5,6 +5,7 @@ import com.thenexus.backend.event.dto.CreateEventRequest;
 import com.thenexus.backend.event.dto.CreateTicketTierRequest;
 import com.thenexus.backend.event.dto.EventResponse;
 import com.thenexus.backend.event.dto.TicketTierResponse;
+import com.thenexus.backend.event.dto.PublicEventWithTiersResponse;
 import com.thenexus.backend.event.service.EventService;
 import com.thenexus.backend.security.NexusPrincipal;
 import jakarta.validation.Valid;
@@ -37,6 +38,11 @@ public class EventController {
   @GetMapping("/slug/{slug}")
   ApiResponse<EventResponse> publicEventBySlug(@PathVariable String slug) {
     return ApiResponse.ok(eventService.publicEventBySlug(slug));
+  }
+
+  @GetMapping("/public/events/{slug}")
+  ApiResponse<PublicEventWithTiersResponse> publicEventWithTiersBySlug(@PathVariable String slug) {
+    return ApiResponse.ok(eventService.publicEventWithTiersBySlug(slug));
   }
 
   @GetMapping("/{eventId}/ticket-tiers")

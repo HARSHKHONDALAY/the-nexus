@@ -20,4 +20,8 @@ public interface PlatformEventRepository extends JpaRepository<PlatformEvent, UU
   // Safe query that explicitly joins categories to prevent lazy loading issues
   @Query("SELECT e FROM PlatformEvent e LEFT JOIN FETCH e.category WHERE e.status IN :statuses AND e.deletedAt IS NULL AND e.visibility = 'PUBLIC' ORDER BY e.startsAt ASC")
   List<PlatformEvent> findByStatusInOrderByStartsAtAscWithCategories(List<EventStatus> statuses);
+  
+  // Find event by slug with category to prevent lazy loading issues
+  @Query("SELECT e FROM PlatformEvent e LEFT JOIN FETCH e.category WHERE e.slug = :slug")
+  Optional<PlatformEvent> findBySlugWithCategory(String slug);
 }

@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 import SectionWrapper from "@/components/layout/section-wrapper";
 import { Button } from "@/components/shared/button";
 import { getBackgroundVideo, getPrimaryHeroImage } from "@/lib/event-media";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 
 interface EventCinematicVideoProps {
   event: EventData;
@@ -50,7 +50,7 @@ export default function EventCinematicVideo({ event }: EventCinematicVideoProps)
           loop
           playsInline
           preload="metadata"
-          poster={String((fallbackImage as any).src)}
+          poster={String((fallbackImage as { src: string }).src)}
           aria-label={`${event.title} ${video.label.toLowerCase()} footage`}
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_24%,rgba(103,232,249,0.16),transparent_32%),linear-gradient(90deg,rgba(0,0,0,0.92),rgba(0,0,0,0.48)_58%,rgba(0,0,0,0.74))]" />

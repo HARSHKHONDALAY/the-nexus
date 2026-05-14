@@ -1,4 +1,3 @@
-import type { NextConfig } from "next";
 
 const cdnHostname = (() => {
   const url = process.env.NEXT_PUBLIC_CDN_URL;
@@ -53,7 +52,7 @@ const nextConfig = {
   },
 
   // Bundle optimization
-  webpack: (config: any, { dev, isServer }: any) => {
+  webpack: (config: { optimization?: { usedExports?: boolean; sideEffects?: boolean; splitChunks?: { chunks: string; cacheGroups?: Record<string, { test?: RegExp; name?: string; chunks: string }> } } }, { dev, isServer }: { dev: boolean; isServer: boolean }) => {
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,

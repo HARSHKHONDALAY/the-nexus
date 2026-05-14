@@ -11,11 +11,13 @@ import JsonLd from "@/components/seo/json-ld";
 import {
   getFeaturedEvents,
   getUpcomingEvents,
-} from "@/lib/api/events";
+} from "@/lib/api/events-safe";
+import type { PlatformEvent } from "@/lib/types/api";
 
 import {
   mapPlatformEventsToEventData,
 } from "@/lib/api/event-mappers";
+import type { EventData } from "@/lib/api/event-mappers";
 
 import {
   createMetadata,
@@ -61,8 +63,8 @@ export const metadata =
   });
 
 export default async function EventsPage() {
-  let featuredEvents: any[] = [];
-  let upcomingEvents: any[] = [];
+  let featuredEvents: PlatformEvent[] = [];
+  let upcomingEvents: PlatformEvent[] = [];
 
   try {
     const results =
@@ -112,10 +114,10 @@ export default async function EventsPage() {
     upcomingEvents = [];
   }
 
-  let mappedFeaturedEvents: any[] =
+  let mappedFeaturedEvents: EventData[] =
     [];
 
-  let mappedUpcomingEvents: any[] =
+  let mappedUpcomingEvents: EventData[] =
     [];
 
   try {
@@ -131,7 +133,7 @@ export default async function EventsPage() {
 
     mappedFeaturedEvents =
       mappedFeaturedEvents.filter(
-        (event: any) =>
+        (event: EventData) =>
           event &&
           event.slug &&
           event.title &&
@@ -140,7 +142,7 @@ export default async function EventsPage() {
 
     mappedUpcomingEvents =
       mappedUpcomingEvents.filter(
-        (event: any) =>
+        (event: EventData) =>
           event &&
           event.slug &&
           event.title &&
@@ -161,7 +163,7 @@ export default async function EventsPage() {
 
   const filteredUpcomingEvents =
     mappedUpcomingEvents.filter(
-      (event: any) =>
+      (event: EventData) =>
         event?.slug &&
         (!featuredEvent ||
           event.slug !==
@@ -198,7 +200,7 @@ export default async function EventsPage() {
       <Navbar />
 
       <main className="relative overflow-hidden">
-        <EventsHero />
+        <EventsHero featuredEvent={featuredEvent} />
 
         {featuredEvent && (
           <FeaturedEvent
@@ -245,7 +247,7 @@ export default async function EventsPage() {
         />
       )}
 
-      <FooterEcosystem />
+      <FooterEcosystem featuredEvent={featuredEvent} />
     </>
   );
 }

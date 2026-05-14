@@ -1,51 +1,48 @@
 import { cache } from "react";
+import { getApiBaseUrl } from "@/lib/config/api";
 
-// API Configuration
-function getApiBaseUrl() {
-  const configured = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (configured) return configured;
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("API_BASE_URL must be configured in production");
-  }
-  return "http://localhost:8080/api";
-}
-
-// Enhanced fetch with retry and error handling
+// Enhanced fetch with error handling (no retries for invalid URLs)
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${getApiBaseUrl()}${path}`;
-  const maxRetries = 3;
-  const retryDelay = 1000;
+  console.log(`🌐 Server-side API request to: ${url}`);
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await fetch(url, {
-        cache: options.cache ?? "no-store",
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "Unknown error");
-        throw new Error(`API request failed: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      return data.data || data;
-    } catch (error) {
-      if (attempt === maxRetries) {
-        console.error(`API request failed after ${maxRetries} attempts:`, error);
-        throw error;
-      }
-      console.warn(`API request attempt ${attempt} failed, retrying...`, error);
-      await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+  // Determine caching strategy based on path and options
+  const isAdminPath = path.startsWith('/operations/admin') || path.startsWith('/admin');
+  const isPublicPath = path.startsWith('/events/public') || path.startsWith('/events/slug/') || path.startsWith('/events/') && !path.includes('/admin');
+  
+  // Default caching strategy: public paths use ISR, admin paths stay dynamic
+  let fetchOptions = { ...options };
+  
+  if (!options.cache && !options.next) {
+    if (isPublicPath) {
+      fetchOptions = { ...fetchOptions, next: { revalidate: 60 } };
+    } else if (isAdminPath) {
+      fetchOptions = { ...fetchOptions, cache: "no-store" as RequestCache };
+    } else {
+      fetchOptions = { ...fetchOptions, next: { revalidate: 60 } };
     }
   }
-  
-  // This should never be reached due to the loop logic
-  throw new Error("API request failed unexpectedly");
+
+  try {
+    const response = await fetch(url, {
+      ...fetchOptions,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "Unknown error");
+      throw new Error(`API request failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data.data || data;
+  } catch (error) {
+    console.error(`API request failed:`, error);
+    throw error;
+  }
 }
 
 // Event Types - matching backend DTO structure
@@ -53,15 +50,15 @@ export interface TicketTier {
   id: string;
   name: string;
   description: string;
-  pricePaise: number;
+  price_paise: number;
   currency: string;
   capacity: number;
-  soldCount: number;
-  reservedCount: number;
-  salesStartAt?: string;
-  salesEndAt?: string;
+  sold_count: number;
+  reserved_count: number;
+  sales_start_at?: string;
+  sales_end_at?: string;
   active: boolean;
-  sortOrder: number;
+  sort_order: number;
 }
 
 export interface EventCategory {
@@ -80,30 +77,30 @@ export interface PlatformEvent {
   subtitle?: string;
   description: string;
   status: "DRAFT" | "PUBLISHED" | "LIVE" | "SOLD_OUT" | "CLOSED" | "CANCELLED" | "ARCHIVED";
-  venueName: string;
-  venueAddress?: string;
+  venue_name: string;
+  venue_address?: string;
   city: string;
-  startsAt: string;
-  endsAt: string;
+  starts_at: string;
+  ends_at: string;
   timezone: string;
-  bannerUrl?: string;
-  heroMediaUrl?: string;
+  banner_url?: string;
+  hero_media_url?: string;
   capacity: number;
-  waitlistEnabled: boolean;
-  registrationOpen: boolean;
-  allowWalkIns: boolean;
+  waitlist_enabled: boolean;
+  registration_open: boolean;
+  allow_walk_ins: boolean;
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
-  seoTitle?: string;
-  seoDescription?: string;
-  venueCostPaise: number;
-  publishedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  ticketTiers?: TicketTier[];
+  seo_title?: string;
+  seo_description?: string;
+  venue_cost_paise: number;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+  ticket_tiers?: TicketTier[];
 }
 
 export interface EventWithTicketTiers extends PlatformEvent {
-  ticketTiers: TicketTier[];
+  ticket_tiers: TicketTier[];
 }
 
 // API Functions with caching
@@ -114,8 +111,20 @@ export const getPublicEvents = cache(async function getPublicEvents(): Promise<P
     
     // Validate backend response
     if (Array.isArray(backendEvents)) {
-      console.log(`✅ Successfully fetched ${backendEvents.length} events from backend`);
-      return backendEvents;
+      // Filter only by status - remove all name/slug-based filtering
+      const filteredEvents = backendEvents.filter(event => {
+        // Only filter invalid backend objects
+        if (!event || !event.id || !event.title || !event.status) {
+          console.log(`🚫 Filtering out invalid event object: missing required fields`);
+          return false;
+        }
+        
+        // Only return valid published/live events
+        return event.status === "PUBLISHED" || event.status === "LIVE";
+      });
+      
+      console.log(`✅ Successfully fetched ${filteredEvents.length} valid events from backend`);
+      return filteredEvents;
     }
     
     throw new Error("Invalid backend response format");
@@ -132,9 +141,9 @@ export const getEventBySlug = cache(async function getEventBySlug(slug: string):
     const event = await apiFetch<EventWithTicketTiers>(`/events/slug/${slug}`);
     
     // Fetch ticket tiers separately if not included
-    if (!event.ticketTiers) {
+    if (!event.ticket_tiers) {
       const ticketTiers = await apiFetch<TicketTier[]>(`/events/${event.id}/ticket-tiers`);
-      event.ticketTiers = ticketTiers;
+      event.ticket_tiers = ticketTiers;
     }
     
     return event;
@@ -146,10 +155,10 @@ export const getEventBySlug = cache(async function getEventBySlug(slug: string):
 
 export const getFeaturedEvents = cache(async function getFeaturedEvents(): Promise<PlatformEvent[]> {
   try {
+    // getPublicEvents already filters out fake/demo events
     const events = await getPublicEvents();
-    // For now, return all published events as featured
-    // TODO: Add featured flag logic in backend
-    return events.filter(event => event.status === "PUBLISHED" || event.status === "LIVE");
+    // Return all valid published/live events as featured
+    return events;
   } catch (error) {
     console.error("Failed to fetch featured events:", error);
     return [];
@@ -161,8 +170,8 @@ export const getUpcomingEvents = cache(async function getUpcomingEvents(): Promi
     const events = await getPublicEvents();
     const now = new Date();
     return events
-      .filter(event => new Date(event.startsAt) > now)
-      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+      .filter(event => new Date(event.starts_at) > now)
+      .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
   } catch (error) {
     console.error("Failed to fetch upcoming events:", error);
     return [];
@@ -170,7 +179,7 @@ export const getUpcomingEvents = cache(async function getUpcomingEvents(): Promi
 });
 
 // Admin API functions (separate from public)
-export async function getAdminEvents(actorId: string): Promise<PlatformEvent[]> {
+export async function getAdminEvents(): Promise<PlatformEvent[]> {
   try {
     // Use the correct admin operations endpoint
     const currentEvents = await apiFetch<PlatformEvent[]>("/operations/admin/events/current");

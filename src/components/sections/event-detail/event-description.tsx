@@ -1,5 +1,5 @@
 import SectionWrapper from "@/components/layout/section-wrapper";
-type EventData = any;
+import type { EventData } from "@/lib/types/api";
 import { Button } from "@/components/shared/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";

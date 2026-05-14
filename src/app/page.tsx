@@ -9,10 +9,14 @@ import FeaturedExperiences from "@/components/sections/featured-experiences";
 import PhilosophyBelonging from "@/components/sections/philosophy-belonging";
 import FloatingTicketCta from "@/components/conversion/floating-ticket-cta";
 import JsonLd from "@/components/seo/json-ld";
-import { getFeaturedEvents } from "@/lib/api/events";
+import { getFeaturedEvents } from "@/lib/api/events-safe";
 import { mapPlatformEventsToEventData } from "@/lib/api/event-mappers";
+import type { PlatformEvent } from "@/lib/types/api";
+import type { EventData } from "@/lib/api/event-mappers";
 import { createMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema, eventItemListSchema, jsonLdGraph, webPageSchema } from "@/lib/seo/schema";
+
+export const revalidate = 60; // Revalidate homepage every 60 seconds
 
 const title = "The Nexus | Premium Events, Chess Socials & Art Workshops in Mumbai";
 const description =
@@ -28,9 +32,9 @@ export const metadata = createMetadata({
 
 export default async function HomePage() {
   // Fetch featured events from backend API with safe error handling
-  let featuredEvents: any[] = [];
-  let mappedEvents: any[] = [];
-  let featuredEvent: any = null;
+  let featuredEvents: PlatformEvent[] = [];
+  let mappedEvents: EventData[] = [];
+  let featuredEvent: EventData | null = null;
   
   try {
     featuredEvents = await getFeaturedEvents();
@@ -58,7 +62,7 @@ export default async function HomePage() {
 
       <main className="relative z-10 overflow-hidden">
         <GlobalAtmosphere />
-        <Hero />
+        <Hero featuredEvent={featuredEvent} />
         <FeaturedExperiences />
         <PhilosophyBelonging />
         <CommunityEnergy />
@@ -66,7 +70,7 @@ export default async function HomePage() {
         <EditorialShowcase />
       </main>
       {featuredEvent && featuredEvent.slug && <FloatingTicketCta event={featuredEvent} />}
-      <FooterEcosystem />
+      <FooterEcosystem featuredEvent={featuredEvent} />
     </>
   );
 }

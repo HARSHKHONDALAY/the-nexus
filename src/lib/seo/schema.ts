@@ -159,20 +159,6 @@ export function breadcrumbSchema(items: BreadcrumbItem[]) {
   };
 }
 
-function parsePrice(value: string) {
-  const match = value.replace(/,/g, "").match(/(\d+(?:\.\d+)?)/);
-  return match?.[1] ?? "0";
-}
-
-function addDays(date: string, days: number) {
-  const next = new Date(`${date}T00:00:00.000Z`);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next.toISOString().slice(0, 10);
-}
-
-function getTimezone(value: string) {
-  return value.match(/([+-]\d{2}:\d{2})$/)?.[1] ?? "+05:30";
-}
 
 // Event date functions removed - now using backend API directly
 

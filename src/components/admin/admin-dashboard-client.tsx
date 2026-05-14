@@ -103,7 +103,7 @@ export default function AdminDashboardClient() {
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h4 className="text-lg font-semibold text-lime-50">{event.title}</h4>
-                        <p className="mt-1 text-sm text-lime-100/52">{formatDateTime(event.startsAt)} · {event.venueName}</p>
+                        <p className="mt-1 text-sm text-lime-100/52">{formatDateTime(event.starts_at)} · {event.venue_name}</p>
                       </div>
                       <StatusChip tone={event.status === "LIVE" ? "lime" : "blue"}>{event.status}</StatusChip>
                     </div>
@@ -129,7 +129,7 @@ export default function AdminDashboardClient() {
                 {dashboard.recentActivity.length === 0 ? <p className="text-sm text-lime-100/52">No audit activity yet.</p> : dashboard.recentActivity.map((log) => (
                   <div key={log.id} className="border-l border-lime-300/24 pl-4">
                     <p className="text-sm font-medium text-lime-50">{log.action}</p>
-                    <p className="mt-1 text-xs leading-5 text-lime-100/50">{log.actor} · {formatDateTime(log.createdAt)}</p>
+                    <p className="mt-1 text-xs leading-5 text-lime-100/50">{log.actor} · {formatDateTime(log.created_at)}</p>
                   </div>
                 ))}
               </div>

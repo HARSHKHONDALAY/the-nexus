@@ -13,11 +13,11 @@ public record CreateBookingRequest(
     @NotNull UUID ticketTierId,
     @NotBlank @Size(max = 160) String attendeeName,
     @NotBlank @Email @Size(max = 320) String attendeeEmail,
-    @Size(max = 40) String attendeePhone,
+    @NotBlank @Size(max = 40) String attendeePhone,
     @Size(max = 120) String instagramId,
-    @Min(1) @Max(120) Integer attendeeAge,
-    @Size(max = 160) String attendeeLocation,
-    @Size(max = 160) String occupation,
+    @NotNull @Min(1) @Max(120) Integer attendeeAge,
     @Size(max = 80) String sourceType,
     @Size(max = 1000) String notes,
-    @Min(1) @Max(8) int quantity) {}
+    @Min(1) @Max(1) int quantity,
+    @NotNull Boolean privacyConsent,
+    @NotNull Boolean mediaConsent) {}

@@ -1,7 +1,7 @@
-import type { FinanceAdjustmentOperator, FinanceAdjustmentSection } from "@prisma/client";
+import type { FinanceEntryType } from "@/lib/types/prisma-enums";
 
-export function signedAdjustmentAmount(amount: number, operator: FinanceAdjustmentOperator, section: FinanceAdjustmentSection) {
-  const expenseSections: FinanceAdjustmentSection[] = ["VENUE_COST", "EXPENSE", "REFUND", "DISCOUNT"];
+export function signedAdjustmentAmount(amount: number, operator: "ADD" | "SUBTRACT", section: FinanceEntryType) {
+  const expenseSections: FinanceEntryType[] = ["EXPENSE", "REFUND"];
   const base = operator === "SUBTRACT" || expenseSections.includes(section) ? -Math.abs(amount) : Math.abs(amount);
   return base;
 }

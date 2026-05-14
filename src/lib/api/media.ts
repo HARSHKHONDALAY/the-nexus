@@ -1,6 +1,5 @@
 import type { PlatformEvent } from "./events";
-import type { EventAssetSet, ImageAsset, VideoAsset } from "@/data/eventAssetTypes";
-type EventData = any;
+import type { EventData } from "@/lib/api/event-mappers";
 
 // Dynamic image asset for backend URLs (different from StaticImageData)
 export interface DynamicImageAsset {
@@ -42,89 +41,24 @@ export interface BackendMediaAsset {
   status: "UPLOADED" | "PROCESSING" | "PUBLISHED" | "ARCHIVED" | "REJECTED";
   altText?: string;
   sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
-// Fallback media system for when backend assets are not available
-export function getFallbackMediaAssetSet(world: EventData["world"]): DynamicEventAssetSet {
-  // Import the existing hardcoded assets as fallback
-  if (world === "The Chess Nexus") {
-    return {
-      heroImages: [
-        {
-          id: "chess-hero-fallback",
-          src: "/events/chess-nexus/hero.jpg",
-          alt: "Chess Nexus Event",
-          width: 1920,
-          height: 1080,
-        },
-      ],
-      thumbnails: [
-        {
-          id: "chess-thumb-fallback",
-          src: "/events/chess-nexus/thumbnail.jpg",
-          alt: "Chess Nexus",
-          width: 400,
-          height: 300,
-        },
-      ],
-      galleryImages: [
-        {
-          id: "chess-gallery-1",
-          src: "/events/chess-nexus/gallery-1.jpg",
-          alt: "Chess Community",
-          width: 800,
-          height: 600,
-        },
-        {
-          id: "chess-gallery-2",
-          src: "/events/chess-nexus/gallery-2.jpg",
-          alt: "Chess Tournament",
-          width: 800,
-          height: 600,
-        },
-      ],
-      videos: [],
-    };
-  }
+// Generic fallback media system - no event-specific assets
+export function getFallbackMediaAssetSet(): DynamicEventAssetSet {
+  const genericPlaceholder = {
+    id: "generic-placeholder",
+    src: "/events/default-thumbnail.jpg",
+    alt: "Event",
+    width: 1200,
+    height: 800,
+  };
 
-  // Art Nexus fallback
   return {
-    heroImages: [
-      {
-        id: "art-hero-fallback",
-        src: "/events/art-nexus/hero.jpg",
-        alt: "Art Nexus Event",
-        width: 1920,
-        height: 1080,
-      },
-    ],
-    thumbnails: [
-      {
-        id: "art-thumb-fallback",
-        src: "/events/art-nexus/thumbnail.jpg",
-        alt: "Art Nexus",
-        width: 400,
-        height: 300,
-      },
-    ],
-    galleryImages: [
-      {
-        id: "art-gallery-1",
-        src: "/events/art-nexus/gallery-1.jpg",
-        alt: "Art Workshop",
-        width: 800,
-        height: 600,
-      },
-      {
-        id: "art-gallery-2",
-        src: "/events/art-nexus/gallery-2.jpg",
-        alt: "Creative Session",
-        width: 800,
-        height: 600,
-      },
-    ],
+    heroImages: [genericPlaceholder],
+    thumbnails: [genericPlaceholder],
+    galleryImages: [genericPlaceholder],
     videos: [],
   };
 }
@@ -178,8 +112,7 @@ export function mapBackendMediaToFrontend(backendAssets: BackendMediaAsset[]): D
 export async function getEventMediaWithFallback(event: PlatformEvent | EventData): Promise<DynamicEventAssetSet> {
   try {
     // If we have a PlatformEvent with media assets, use them
-    if ("ticketTiers" in event && (event as PlatformEvent).id) {
-      const platformEvent = event as PlatformEvent;
+    if ("ticketTiers" in event && (event as unknown as PlatformEvent).id) {
       
       // Try to fetch media assets from backend
       // This would require a new API endpoint like /events/{id}/media
@@ -189,19 +122,13 @@ export async function getEventMediaWithFallback(event: PlatformEvent | EventData
       // return mapBackendMediaToFrontend(backendAssets);
     }
 
-    // Use fallback based on world/type
-    const world = ("world" in event) ? event.world : 
-                 (event.category?.slug === "chess-nexus") ? "The Chess Nexus" : 
-                 (event.category?.slug === "art-nexus") ? "The Art Nexus" : 
-                 "The Chess Nexus";
-
-    return getFallbackMediaAssetSet(world);
+    // Use generic fallback - no event-specific logic
+    return getFallbackMediaAssetSet();
   } catch (error) {
     console.error("Failed to load event media, using fallback:", error);
     
     // Ultimate fallback
-    const world = ("world" in event) ? event.world : "The Chess Nexus";
-    return getFallbackMediaAssetSet(world);
+    return getFallbackMediaAssetSet();
   }
 }
 
@@ -212,8 +139,8 @@ export async function getPrimaryThumbnailWithFallback(event: PlatformEvent | Eve
     id: "ultimate-fallback",
     src: "/events/default-thumbnail.jpg",
     alt: "Event",
-    width: 400,
-    height: 300,
+    width: 1200,
+    height: 800,
   };
 }
 
@@ -221,33 +148,19 @@ export async function getPrimaryThumbnailWithFallback(event: PlatformEvent | Eve
 export async function getEventCardImageWithFallback(event: PlatformEvent | EventData): Promise<DynamicImageAsset> {
   const mediaSet = await getEventMediaWithFallback(event);
   
-  // Try to find specific images by slug if available
-  const slug = ("slug" in event) ? event.slug : "unknown";
-  
-  if (slug === "checkmate-chaos") {
-    return (
-      mediaSet.galleryImages.find((asset) => asset.id.includes("community")) ??
-      mediaSet.galleryImages[0] ??
-      mediaSet.thumbnails[0] ??
-      mediaSet.heroImages[0] ??
-      {
-        id: "chess-chaos-fallback",
-        src: "/events/chess-nexus/checkmate-chaos.jpg",
-        alt: "Checkmate Chaos",
-        width: 800,
-        height: 600,
-      }
-    );
-  }
-
-  // Default fallback
-  return mediaSet.galleryImages[0] || mediaSet.thumbnails[0] || mediaSet.heroImages[0] || {
-    id: "default-card",
-    src: "/events/default-card.jpg",
-    alt: "Event",
-    width: 800,
-    height: 600,
-  };
+  // Generic fallback logic - no hardcoded test slug references
+  return (
+    mediaSet.galleryImages.find((asset) => asset.id.includes("community")) ??
+    mediaSet.galleryImages[0] ??
+    mediaSet.heroImages[0] ??
+    {
+      id: "default-gallery-fallback",
+      src: "/events/default-gallery.jpg",
+      alt: "Event Gallery",
+      width: 800,
+      height: 600,
+    }
+  );
 }
 
 // Get background video with fallback
